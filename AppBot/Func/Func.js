@@ -59,10 +59,10 @@ constructor(name,linked = [],build = async (props) => {}){
        return Button.New(text,`${path}${JSON.stringify(props)}`,url)
     }
     
-    this.WaitInput = (id,inputpath = this.Name) => {
+    this.WaitInput = (id,inputpath = this.Name,props = {}) => {
         if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
            this.Builds[this.Builds.findIndex(e => e.id == id)].waitInput = true
-           this.Builds[this.Builds.findIndex(e => e.id == id)].inputPath = inputpath
+           this.Builds[this.Builds.findIndex(e => e.id == id)].inputPath = `${inputpath}${JSON.stringify(props)}`
            
         } else {
        let erro
