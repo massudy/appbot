@@ -1,13 +1,18 @@
 import TelegramBot from "node-telegram-bot-api";
 import Func from "./Func/Func.js"
-import Session from "./Session.js";
-import callbackFilter from "./callbackFilter.js";
+import Session from "./Config/Session.js";
+import callbackFilter from "./Config/callbackFilter.js";
 import NotFounded from "./Func/NotFounded.js";
+import TemplateFunc from "./Func/TemplateFunc.js";
 
 class AppBot extends TelegramBot {
-    constructor(token,mainfunc){
+    constructor(token,mainfunc = TemplateFunc){
         super(token,{polling : true})
-    
+        
+        if(mainfunc == TemplateFunc){
+            console.error('ERROR - Mainfunc não carregada... | Iniciando com uma TemplateFunc')
+        }
+
         this.Funcs = [new Func]
         this.Funcs.splice(0,1)
         this.Sessions = [new Session]
@@ -32,7 +37,6 @@ class AppBot extends TelegramBot {
         
         
         this.on('callback_query',(c) => {
-            console.log(c)
             let session = this.GetSession(c.from.id)
             if(session){
                 this.LoadScreen(c.data,session)
@@ -75,7 +79,7 @@ class AppBot extends TelegramBot {
             }
             this.Sessions.push(new Session(m.from.id,m.from.first_name))
         session = this.GetSession(m.from.id)
-        this.ReloadScreen(this.Funcs[0].Name,session,'Boas vindas')
+        this.ReloadScreen(this.Funcs[0].Name,session)
           }
         
 
@@ -152,7 +156,6 @@ async ReloadScreen(path,session = new Session,alert = null){
         
 ${build_object.FinalText}`
     }
-    console.log(session)
     this.deleteMessage(session.userID,session.lastMsgID).catch(e => {})
     const keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
     .then((keyboard) => {
@@ -170,7 +173,7 @@ ${build_object.FinalText}`
 }
 
 
-
+static Func(){return Func}
 
 }
 
