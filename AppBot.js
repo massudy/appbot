@@ -99,6 +99,7 @@ return this.Sessions.findIndex(e => e.userID == userid)
 async LoadScreen(path,session = new Session,alert = null){
 this.Sessions[this.SessionIndex(session.userID)].inAction = true
 this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
+this.Sessions[this.SessionIndex(session.userID)].waitInput = false
 const filteredpath = callbackFilter(path)
 filteredpath.props.mainfunc = this.Funcs[0].Name
 filteredpath.props.session = session
