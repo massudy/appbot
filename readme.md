@@ -34,3 +34,5 @@ const BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
 
 const bot = new AppBot(BOT_TOKEN,Menu)
 ```
+## Full Documentation
+[Portuguese-BR](https://telegram-appbot.notion.site/Guia-694589155da74b4e9b555fdd3088ac6d)
