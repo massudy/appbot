@@ -1,6 +1,6 @@
 {
   "name": "appbot",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Minimalist and Responsive TelegramBot",
   "main": "AppBot.js",
   "type": "module",
@@ -13,7 +13,7 @@
     "Telegrambot",
     "chatbot",
     "create bot"
-    ],
+  ],
   "author": "Daniel Massud",
   "license": "ISC",
   "dependencies": {
