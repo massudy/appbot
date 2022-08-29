@@ -166,6 +166,10 @@ ${build_object.FinalText}`
     if(keyboardCreated){
         this.Sessions[this.SessionIndex(session.userID)].lastMsgID = keyboardCreated.message_id
     } 
+    if(session.inputValue){
+        this.Sessions[this.SessionIndex(session.userID)].waitInput = null
+    }
+    
     if(build_object.waitInput){
         this.Sessions[this.SessionIndex(session.userID)].waitInput = true
         this.Sessions[this.SessionIndex(session.userID)].inputPath = build_object.inputPath
