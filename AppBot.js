@@ -4,6 +4,7 @@ import Session from "./Config/Session.js";
 import callbackFilter from "./Config/callbackFilter.js";
 import NotFounded from "./Func/NotFounded.js";
 import TemplateFunc from "./Func/TemplateFunc.js";
+import Cast from "./Config/Cast.js";
 
 class AppBot extends TelegramBot {
     constructor(token,mainfunc = TemplateFunc){
@@ -12,10 +13,31 @@ class AppBot extends TelegramBot {
         if(mainfunc == TemplateFunc){
             console.error('ERROR - Mainfunc não carregada... | Iniciando com uma TemplateFunc')
         }
-
+        
+       
         this.Funcs = [new Func]
         this.Funcs.splice(0,1)
         this.Sessions = [new Session]
+        this.Sessions.splice(0,1)
+        
+        this.BroadcastList = [new Cast]
+        this.BroadcastList.splice(0,1)
+        
+        this.Broadcaster = setInterval(() => {
+            if(this.BroadcastList.length){
+               const cast = this.BroadcastList.splice(0,1).at(0)
+               if(cast.userID && cast.Path){
+                const session = this.GetSession(cast.userID) 
+                if(session){
+                 console.log(`Mensagem enviada para ${session.userName}`)
+                 this.ReloadScreen(cast.Path,session)
+                } else {
+                 console.log(`Usuario de id ${cast.userID} não esta na session list`)
+                }
+               }
+             }
+        }, 500);
+
         
         let funcs = []
         let toadd = []
@@ -126,6 +148,14 @@ const config = {
 this.editMessageReplyMarkup(build_object.FinalButtons.reply_markup,config).catch((e) => { })
 this.editMessageText(build_object.FinalText,config).catch((e) => { })
 
+if(build_object.newPath){
+    this.Sessions[this.SessionIndex(session.userID)].actualScreen = build_object.newPath
+}
+
+if(build_object.BroadcastList.length){
+    this.Broadcast(build_object.BroadcastList)
+}
+
 if(build_object.waitInput){
     this.Sessions[this.SessionIndex(session.userID)].waitInput = true
     this.Sessions[this.SessionIndex(session.userID)].inputPath = build_object.inputPath
@@ -157,19 +187,35 @@ async ReloadScreen(path,session = new Session,alert = null){
         
 ${build_object.FinalText}`
     }
+    
     this.deleteMessage(session.userID,session.lastMsgID).catch(e => {})
+    
     const keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
     .then((keyboard) => {
         return keyboard
     }).catch(e => {})
 
     if(keyboardCreated){
+        if(!session.lastMsgID){
+             for(let i = keyboardCreated.message_id-20;i<keyboardCreated.message_id;i++){
+                this.deleteMessage(session.userID,i).catch(e => {})
+            }
+            }
         this.Sessions[this.SessionIndex(session.userID)].lastMsgID = keyboardCreated.message_id
     } 
     if(session.inputValue){
         this.Sessions[this.SessionIndex(session.userID)].waitInput = null
     }
     
+    
+    if(build_object.newPath){
+        this.Sessions[this.SessionIndex(session.userID)].actualScreen = build_object.newPath
+    }
+
+    if(build_object.BroadcastList.length){
+        this.Broadcast(build_object.BroadcastList)
+    }
+
     if(build_object.waitInput){
         this.Sessions[this.SessionIndex(session.userID)].waitInput = true
         this.Sessions[this.SessionIndex(session.userID)].inputPath = build_object.inputPath
@@ -177,6 +223,17 @@ ${build_object.FinalText}`
     this.Sessions[this.SessionIndex(session.userID)].inAction = false
 }
 
+Broadcast(castlist = [new Cast]){
+this.BroadcastList.push(...castlist)
+}
+
+AddSessions(sessionlist = [new Session]){
+    this.Sessions.push(...sessionlist)
+}
+
+static Session(userid,username){return new Session(userid,username)}
+
+static Cast(userid,path,props = {}){return new Cast(userid,path,props)}
 
 static Func(){return Func}
 

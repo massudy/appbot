@@ -1,4 +1,5 @@
 import Button from "./Button.js"
+import Cast from "../Config/Cast.js"
 
 class Func {
 constructor(name,linked = [],build = async (props) => {}){
@@ -13,9 +14,10 @@ constructor(name,linked = [],build = async (props) => {}){
         FullyText : '',
         FullyButtons : [],
         waitInput : false,
-        inputPath : ''
-        
-    }]
+        inputPath : '',
+        BroadcastList : [],
+        newPath : null
+        }]
 
     //Funções que preenchem texto e botões
     this.Text = (id,text = '') => {
@@ -71,10 +73,33 @@ constructor(name,linked = [],build = async (props) => {}){
        }
     }
    
+    this.Broadcast = (id,castlist = [new Cast]) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+        this.Builds[this.Builds.findIndex(e => e.id == id)].BroadcastList.push(...castlist)
+        } else {
+            let erro
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao ativar o Broadcast na Func ${this.Name} | ${erro}`)
+        }
+        
+    }
+
+    this.Cast = (userid,path,props = {}) => {return new Cast(userid,path,props)}
+
+    this.SetPath = (id,path,props = {}) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+            this.Builds[this.Builds.findIndex(e => e.id == id)].newPath = `${path}${JSON.stringify(props)}`
+            } else {
+                let erro
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao ativar o SetPath na Func ${this.Name} | ${erro}`)
+            }
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {
-        this.Builds.push({id : props.userid,FullyText : '',FullyButtons : [],waitInput : false,inputPath : ''})
+        this.Builds.push({id : props.userid,FullyText : '',FullyButtons : [],waitInput : false,inputPath : '',BroadcastList : [],newPath : null})
         await build(props)
         if(this.Builds[this.Builds.findIndex(e => e.id == props.userid)]){
             return {
@@ -83,8 +108,10 @@ constructor(name,linked = [],build = async (props) => {}){
                     inline_keyboard : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].FullyButtons
                 }},
                 waitInput : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].waitInput,
-                inputPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].inputPath
-            }
+                inputPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].inputPath,
+                BroadcastList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].BroadcastList,
+                newPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].newPath
+                 }
         } else {
             return {
                 FinalText : 'Erro de carregamento',
