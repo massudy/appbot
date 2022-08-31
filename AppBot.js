@@ -86,13 +86,13 @@ class AppBot extends TelegramBot {
                         session = this.GetSession(m.from.id)
                         this.ReloadScreen(session.inputPath,session)
                     } else {
-                        this.ReloadScreen(session.actualScreen,session,`⚠️ *Para navegar utilize apenas os botões*`)
+                        this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
                     }
                      } else {
                         console.log(`${session.userName} está inAction`)
                      }
             } else {
-                this.ReloadScreen(session.actualScreen,session,`⚠️ *Para navegar utilize apenas os botões*`)
+                this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
             }
            
         } else {
