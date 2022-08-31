@@ -122,6 +122,8 @@ async LoadScreen(path,session = new Session,alert = null){
 this.Sessions[this.SessionIndex(session.userID)].inAction = true
 this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
 this.Sessions[this.SessionIndex(session.userID)].waitInput = false
+this.Sessions[this.SessionIndex(session.userID)].inputValue = null
+
 const filteredpath = callbackFilter(path)
 filteredpath.props.mainfunc = this.Funcs[0].Name
 filteredpath.props.session = session
@@ -204,7 +206,7 @@ ${build_object.FinalText}`
         this.Sessions[this.SessionIndex(session.userID)].lastMsgID = keyboardCreated.message_id
     } 
     if(session.inputValue){
-        this.Sessions[this.SessionIndex(session.userID)].waitInput = null
+        this.Sessions[this.SessionIndex(session.userID)].inputValue = null
     }
     
     
