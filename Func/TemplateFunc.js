@@ -8,10 +8,11 @@ class TemplateFunc extends Func {
             async (props) => {
                 const userid = props.userid
                 
+
                     switch (props.country) {
                         case 'br':
-                            this.Text(userid,`🇧🇷 Brazil
-👤 Population : 212 Milions`)
+                            this.LineText.Center(userid,`🇧🇷 Brazil`)
+                            this.LineText.Center(userid,`👤 Population : 212 Milions`)
                             this.Button(userid,'← Back',this.Name)
                             break;
 
@@ -22,10 +23,11 @@ class TemplateFunc extends Func {
                             break;
                     
                         default:
-                            this.Text(userid,'Hello World')
+                            this.LineText.Center(userid,'Hello World !!')
                             this.Button(userid,'🇧🇷 Brazil',this.Name,{country : 'br'})
                             this.Button(userid,'🇺🇸 EUA',this.Name,{country : 'us'})
-                        break;
+                            this.Button(userid,'Ajustar Tela','adjustscreen')
+                            break;
                     }
                 
 

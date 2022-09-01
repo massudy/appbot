@@ -5,9 +5,10 @@ import callbackFilter from "./Config/callbackFilter.js";
 import NotFounded from "./Func/NotFounded.js";
 import TemplateFunc from "./Func/TemplateFunc.js";
 import Cast from "./Config/Cast.js";
+import AdjustScreen from "./Func/AdjustScreen.js";
 
 class AppBot extends TelegramBot {
-    constructor(token,mainfunc = TemplateFunc){
+    constructor(token,mainfunc = TemplateFunc,config = {adjustscreen : false}){
         super(token,{polling : true})
         
         if(mainfunc == TemplateFunc){
@@ -43,6 +44,7 @@ class AppBot extends TelegramBot {
         let toadd = []
         const firstfunc = new mainfunc()
         funcs.push(firstfunc)
+        funcs.push(new AdjustScreen)
         toadd.push(...firstfunc.Linked)
         while(toadd.length){
             toadd.forEach((f,i) => {
@@ -69,7 +71,12 @@ class AppBot extends TelegramBot {
                
                 this.Sessions.push(new Session(c.from.id,c.from.first_name))
                 session = this.GetSession(c.from.id)
-                this.ReloadScreen(this.Funcs[0].Name,session)
+                if(config.adjustscreen && !session.maxFit){
+                    this.ReloadScreen('adjustscreen',session)
+                } else {
+                    this.ReloadScreen(this.Funcs[0].Name,session)
+                }
+                
             }
             
         })
@@ -101,7 +108,12 @@ class AppBot extends TelegramBot {
             }
             this.Sessions.push(new Session(m.from.id,m.from.first_name))
         session = this.GetSession(m.from.id)
-        this.ReloadScreen(this.Funcs[0].Name,session)
+        if(config.adjustscreen && !session.maxFit){
+            this.ReloadScreen('adjustscreen',session)
+        } else {
+            this.ReloadScreen(this.Funcs[0].Name,session)
+        }
+        
           }
         
 
@@ -158,6 +170,10 @@ if(build_object.BroadcastList.length){
     this.Broadcast(build_object.BroadcastList)
 }
 
+if(build_object.newMaxFit){
+    this.Sessions[this.SessionIndex(session.userID)].maxFit = build_object.newMaxFit
+}
+
 if(build_object.waitInput){
     this.Sessions[this.SessionIndex(session.userID)].waitInput = true
     this.Sessions[this.SessionIndex(session.userID)].inputPath = build_object.inputPath
@@ -209,7 +225,10 @@ ${build_object.FinalText}`
         this.Sessions[this.SessionIndex(session.userID)].inputValue = null
     }
     
-    
+    if(build_object.newMaxFit){
+        this.Sessions[this.SessionIndex(session.userID)].maxFit = build_object.newMaxFit
+    }
+
     if(build_object.newPath){
         this.Sessions[this.SessionIndex(session.userID)].actualScreen = build_object.newPath
     }
@@ -233,7 +252,7 @@ AddSessions(sessionlist = [new Session]){
     this.Sessions.push(...sessionlist)
 }
 
-static Session(userid,username){return new Session(userid,username)}
+static Session(){return Session}
 
 static Cast(userid,path,props = {}){return new Cast(userid,path,props)}
 
@@ -242,3 +261,5 @@ static Func(){return Func}
 }
 
 export default AppBot
+
+

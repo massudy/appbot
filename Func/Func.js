@@ -1,6 +1,7 @@
 import Button from "./Button.js"
 import Cast from "../Config/Cast.js"
-
+import Session from "../Config/Session.js"
+import Spacing from "./Spacing.js"
 class Func {
 constructor(name,linked = [],build = async (props) => {}){
     
@@ -8,22 +9,35 @@ constructor(name,linked = [],build = async (props) => {}){
     this.Name = name // Name : o nome da funcionalidade em minusculo para ser instanciado como uma funcionalidade no AppBot
     this.Linked = linked // Linked : array de outras funcionalidades a serem linkadas e compreendidas no AppBot
 
+    class userBuild{
+        constructor(id,session = new Session){
+            this.id = id
+            this.Session = session
+            this.FullyText = ''
+            this.FullyButtons = []
+            this.waitInput = false
+            this.inputPath = ''
+            this.BroadcastList = []
+            this.newPath = null
+            this.maxFit = null
+        }
+    }
+
+
     //array de builds, a cada build é criado um objeto build em branco que é preenchido com a função build() da funcionalidade e depois é removida
-    this.Builds = [{
-        id : 0,
-        FullyText : '',
-        FullyButtons : [],
-        waitInput : false,
-        inputPath : '',
-        BroadcastList : [],
-        newPath : null
-        }]
+    this.Builds = [new userBuild(0)]
 
     //Funções que preenchem texto e botões
     this.Text = (id,text = '') => {
         if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
             if(text.length < 4090){
-            this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText = text
+                if(this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText.length){
+                    this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText = `${this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText}
+${text}`
+                } else {
+                    this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText = text
+                }
+                
             } else {
                 console.error(`Falha ao carregar o texto ${text.substring(0,40)} | TEXTO MUITO GRANDE`)
                 this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText = 'Erro ao carregar texto'
@@ -96,10 +110,57 @@ constructor(name,linked = [],build = async (props) => {}){
             }
     }
 
+    this.SetMaxFit = (id,maxfit) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+            this.Builds[this.Builds.findIndex(e => e.id == id)].maxFit = maxfit
+            } else {
+                let erro
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao ativar o SetMaxFit na Func ${this.Name} | ${erro}`)
+            }
+    }
+
+    this.LineText = {
+        Start : (id,text = '') => {
+        this.Text(id,text)
+        },
+        Center : (id,text = '') => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+            const maxfit = this.Builds[this.Builds.findIndex(e => e.id == id)].Session.maxFit
+            if(maxfit){
+            const diff = maxfit-text.length
+            const finaltext = `${Spacing(Math.floor(diff/2))}${text}${Spacing(Math.floor(diff/2))}`
+            this.Text(id,finaltext)
+            } else {
+            this.Text(id,text)
+            }
+        } else {
+            this.Text(id,text)
+        }
+        
+        },
+        End : (id,text = '') => {
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                const maxfit = this.Builds[this.Builds.findIndex(e => e.id == id)].Session.maxFit
+                if(maxfit){
+                const diff = maxfit-text.length
+                const finaltext = `${Spacing(diff-1)}${text}`
+                this.Text(id,finaltext)
+                } else {
+                this.Text(id,text) 
+                }
+            } else {
+                this.Text(id,text) 
+            }
+           
+        }
+
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {
-        this.Builds.push({id : props.userid,FullyText : '',FullyButtons : [],waitInput : false,inputPath : '',BroadcastList : [],newPath : null})
+        this.Builds.push(new userBuild(props.userid,props.session))
         await build(props)
         if(this.Builds[this.Builds.findIndex(e => e.id == props.userid)]){
             return {
@@ -110,8 +171,9 @@ constructor(name,linked = [],build = async (props) => {}){
                 waitInput : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].waitInput,
                 inputPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].inputPath,
                 BroadcastList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].BroadcastList,
-                newPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].newPath
-                 }
+                newPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].newPath,
+                newMaxFit :  this.Builds[this.Builds.findIndex(e => e.id == props.userid)].maxFit    
+            }
         } else {
             return {
                 FinalText : 'Erro de carregamento',

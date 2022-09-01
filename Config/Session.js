@@ -1,5 +1,5 @@
 class Session {
-    constructor(userid,username){
+    constructor(userid,username,config = {maxfit : undefined}){
         this.userID = userid
         this.userName = username
         this.waitInput = false
@@ -8,6 +8,7 @@ class Session {
         this.inAction = false
         this.lastMsgID = null
         this.actualScreen = null 
+        this.maxFit = config.maxfit
     }
 }
 
