@@ -7,6 +7,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/massudy/appbot"
+  },
+  "homepage": "https://telegram-appbot.notion.site/Guia-694589155da74b4e9b555fdd3088ac6d",
   "keywords": [
     "telegram",
     "Telegram",
