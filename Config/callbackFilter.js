@@ -4,13 +4,19 @@ let objreturn = {
     props : undefined
 }
 
-if(callback_data.includes('{')){
-    objreturn.path = callback_data.substring(0,callback_data.indexOf('{'))
-    objreturn.props = JSON.parse(callback_data.substring(callback_data.indexOf('{'),callback_data.length))
-   } else {
-    objreturn.path = callback_data
-    objreturn.props = {}
-   }
+if(callback_data){
+    if(callback_data.includes('{')){
+        objreturn.path = callback_data.substring(0,callback_data.indexOf('{'))
+        objreturn.props = JSON.parse(callback_data.substring(callback_data.indexOf('{'),callback_data.length))
+       } else {
+        objreturn.path = callback_data
+        objreturn.props = {}
+       }
+} else {
+        objreturn.path = 'notfounded'
+        objreturn.props = {}
+}
+
 
 
 return objreturn
