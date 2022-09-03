@@ -8,7 +8,7 @@ import Cast from "./Config/Cast.js";
 import AdjustScreen from "./Func/AdjustScreen.js";
 
 class AppBot extends TelegramBot {
-    constructor(token,mainfunc = TemplateFunc,config = {adjustscreen : false}){
+    constructor(token,mainfunc = TemplateFunc,config = {adjustscreen : false,sessions : []}){
         super(token,{polling : true})
         
         if(mainfunc == TemplateFunc){
@@ -21,6 +21,8 @@ class AppBot extends TelegramBot {
         this.Sessions = [new Session]
         this.Sessions.splice(0,1)
         
+        this.AddSessions(config.sessions)
+
         this.BroadcastList = [new Cast]
         this.BroadcastList.splice(0,1)
         
