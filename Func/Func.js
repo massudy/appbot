@@ -51,7 +51,12 @@ ${text}`
     
      this.Button = (id,text,path,props = {},url = false) => {
         if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
-           this.Builds[this.Builds.findIndex(e => e.id == id)].FullyButtons.push([Button.New(text,`${path}${JSON.stringify(props)}`,url)])
+            if(url){
+                this.Builds[this.Builds.findIndex(e => e.id == id)].FullyButtons.push([Button.New(text,`${path}`,url)])
+            } else {
+                this.Builds[this.Builds.findIndex(e => e.id == id)].FullyButtons.push([Button.New(text,`${path}${JSON.stringify(props)}`,url)])
+            }
+           
              } else {
             let erro
             if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
@@ -72,7 +77,13 @@ ${text}`
       
     }
     this.SideButton = (text,path,props = {},url = false) => {
-       return Button.New(text,`${path}${JSON.stringify(props)}`,url)
+        if(url){
+            return Button.New(text,`${path}`,url)
+        } else {
+            return Button.New(text,`${path}${JSON.stringify(props)}`,url)
+        }
+       
+       
     }
     
     this.WaitInput = (id,inputpath = this.Name,props = {}) => {
