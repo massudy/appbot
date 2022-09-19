@@ -15,7 +15,7 @@ class AppBot extends TelegramBot {
             console.error('ERROR - Mainfunc não carregada... | Iniciando com uma TemplateFunc')
         }
         
-       
+        this.Token = token
         this.Funcs = [new Func]
         this.Funcs.splice(0,1)
         this.Sessions = [new Session]
@@ -85,6 +85,8 @@ class AppBot extends TelegramBot {
 
 
         this.on('message',async (m) => {
+        
+        if(m.chat.type == 'private'){
         let session = this.GetSession(m.from.id)
         if(session){
             if(m.text){
@@ -117,7 +119,7 @@ class AppBot extends TelegramBot {
         }
         
           }
-        
+        }
 
         })
 
@@ -142,6 +144,7 @@ const filteredpath = callbackFilter(path)
 filteredpath.props.mainfunc = this.Funcs[0].Name
 filteredpath.props.session = session
 filteredpath.props.userid = session.userID
+filteredpath.props.token = this.Token
 const func = this.Funcs.find(f => f.Name == filteredpath.path)
 let build_object
 if(func){
@@ -190,6 +193,7 @@ async ReloadScreen(path,session = new Session,alert = null){
     filteredpath.props.mainfunc = this.Funcs[0].Name
     filteredpath.props.session = session
     filteredpath.props.userid = session.userID
+    filteredpath.props.token = this.Token
     const func = this.Funcs.find(f => f.Name == filteredpath.path)
     let build_object
     if(func){
