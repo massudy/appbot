@@ -8,19 +8,22 @@ import Cast from "./Config/Cast.js";
 import AdjustScreen from "./Func/AdjustScreen.js";
 
 class AppBot extends TelegramBot {
-    constructor(token,mainfunc = TemplateFunc,config = {adjustscreen : false,sessions : []}){
+    constructor(token,mainfunc = TemplateFunc,config = {adjustscreen : false,sessions : [],keywords : [{keyword : '12f34f3qf43f3q4f34',func : 'functeste'}]}){
         super(token,{polling : true})
         
         if(mainfunc == TemplateFunc){
             console.error('ERROR - Mainfunc não carregada... | Iniciando com uma TemplateFunc')
         }
-        
+       
+        this.Keywords = []
+        if(config.keywords){this.Keywords.push(...config.keywords)}
         this.Token = token
         this.Funcs = [new Func]
         this.Funcs.splice(0,1)
         this.Sessions = [new Session]
         this.Sessions.splice(0,1)
         
+    
         this.AddSessions(config.sessions)
 
         this.BroadcastList = [new Cast]
@@ -97,7 +100,14 @@ class AppBot extends TelegramBot {
                         session = this.GetSession(m.from.id)
                         this.ReloadScreen(session.inputPath,session)
                     } else {
+                        let find_keyword = this.Keywords.find(kw => kw.keyword == m.text)
+                        if(find_keyword){
+                        session = this.GetSession(m.from.id)
+                        this.ReloadScreen(find_keyword.func,session)
+                        } else {
                         this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
+                        }
+                        
                     }
                      } else {
                         console.log(`${session.userName} está inAction`)
