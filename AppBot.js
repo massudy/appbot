@@ -8,7 +8,11 @@ import Cast from "./Config/Cast.js";
 import AdjustScreen from "./Func/AdjustScreen.js";
 
 class AppBot extends TelegramBot {
-    constructor(token,mainfunc = TemplateFunc,config = {adjustscreen : false,sessions : [],keywords : [{keyword : '12f34f3qf43f3q4f34',func : 'functeste'}]}){
+    constructor(token,mainfunc = TemplateFunc,config = {
+        adjustscreen : false,
+        sessions : [],
+        keywords : [{keyword : '12f34f3qf43f3q4f34',func : 'functeste',props : {}}]
+    }){
         super(token,{polling : true})
         
         if(mainfunc == TemplateFunc){
@@ -103,7 +107,12 @@ class AppBot extends TelegramBot {
                         let find_keyword = this.Keywords.find(kw => kw.keyword == m.text)
                         if(find_keyword){
                         session = this.GetSession(m.from.id)
+                        if(find_keyword.props){
+                        this.ReloadScreen(`${find_keyword.func}${JSON.stringify(find_keyword.props)}`,session)
+                        }else {
                         this.ReloadScreen(find_keyword.func,session)
+                        }
+                        
                         } else {
                         this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
                         }
