@@ -183,8 +183,76 @@ const config = {
         parse_mode : "Markdown"
     }   
 
-this.editMessageReplyMarkup(build_object.FinalButtons.reply_markup,config).catch((e) => { })
-this.editMessageText(build_object.FinalText,config).catch((e) => { })
+const options = {
+        reply_markup : build_object.FinalButtons.reply_markup,
+        parse_mode : "Markdown"
+    }
+
+
+if(build_object.ExternalContent.type != null || this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type != null){
+    this.deleteMessage(session.userID,session.lastMsgID).catch(e => {})
+    let keyboardCreated
+
+    if(build_object.ExternalContent.type != null){
+        options.caption = build_object.FinalText
+        this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = build_object.ExternalContent.type
+        
+        if(build_object.ExternalContent.type == 'video'){
+        keyboardCreated = await this.sendVideo(session.userID,build_object.ExternalContent.url,options).catch(async (e) => {
+            console.error('Não foi possivel encontrar o video no url inserido')
+            build_object.FinalText = `❌ Falha ao carregar video
+            
+${build_object.FinalText}`
+            delete options.caption
+            this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
+        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        .then((keyboard) => {
+            return keyboard
+        }).catch(e => {})
+        })
+        } else if (build_object.ExternalContent.type == 'photo'){
+        keyboardCreated = await this.sendPhoto(session.userID,build_object.ExternalContent.url,options).catch(async(e) =>{
+            console.error('Não foi possivel encontrar a imagem no url inserido')
+            build_object.FinalText = `❌ Falha ao carregar imagem
+            
+${build_object.FinalText}`
+            delete options.caption
+            this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
+        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        .then((keyboard) => {
+            return keyboard
+        }).catch(e => {})
+        })
+        }
+
+        
+
+    } else {
+        this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
+        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        .then((keyboard) => {
+            return keyboard
+        }).catch(e => {})
+    }
+
+    
+
+    if(keyboardCreated){
+        if(!session.lastMsgID){
+             for(let i = keyboardCreated.message_id-20;i<keyboardCreated.message_id;i++){
+                this.deleteMessage(session.userID,i).catch(e => {})
+            }
+            }
+        this.Sessions[this.SessionIndex(session.userID)].lastMsgID = keyboardCreated.message_id
+    } 
+
+} else {
+    this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
+    this.editMessageReplyMarkup(build_object.FinalButtons.reply_markup,config).catch((e) => { })
+    this.editMessageText(build_object.FinalText,config).catch((e) => { })
+}
+
+
 
 if(build_object.newPath){
     this.Sessions[this.SessionIndex(session.userID)].actualScreen = build_object.newPath
@@ -233,10 +301,51 @@ ${build_object.FinalText}`
     
     this.deleteMessage(session.userID,session.lastMsgID).catch(e => {})
     
-    const keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
-    .then((keyboard) => {
-        return keyboard
-    }).catch(e => {})
+    let keyboardCreated
+
+    if(build_object.ExternalContent.type != null){
+        options.caption = build_object.FinalText
+        this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = build_object.ExternalContent.type
+        
+        if(build_object.ExternalContent.type == 'video'){
+        keyboardCreated = await this.sendVideo(session.userID,build_object.ExternalContent.url,options).catch(async (e) => {
+            console.error('Não foi possivel encontrar o video no url inserido')
+            build_object.FinalText = `❌ Falha ao carregar video
+            
+${build_object.FinalText}`
+            delete options.caption
+            this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
+        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        .then((keyboard) => {
+            return keyboard
+        }).catch(e => {})
+        })
+        } else if (build_object.ExternalContent.type == 'photo'){
+        keyboardCreated = await this.sendPhoto(session.userID,build_object.ExternalContent.url,options).catch(async (e) =>{
+            console.error('Não foi possivel encontrar a imagem no url inserido')
+            build_object.FinalText = `❌ Falha ao carregar imagem
+            
+${build_object.FinalText}`
+            delete options.caption
+            this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
+        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        .then((keyboard) => {
+            return keyboard
+        }).catch(e => {})
+        })
+        }
+
+        
+
+    } else {
+        this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
+        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        .then((keyboard) => {
+            return keyboard
+        }).catch(e => {})
+    }
+
+    
 
     if(keyboardCreated){
         if(!session.lastMsgID){

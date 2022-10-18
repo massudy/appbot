@@ -9,6 +9,9 @@ class Session {
         this.lastMsgID = null
         this.actualScreen = null 
         this.maxFit = config.maxfit
+        this.ExternalContent = {
+            type : null
+        }
     }
 }
 

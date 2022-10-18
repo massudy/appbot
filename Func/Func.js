@@ -20,6 +20,10 @@ constructor(name,linked = [],build = async (props) => {}){
             this.BroadcastList = []
             this.newPath = null
             this.maxFit = null
+            this.ExternalContent = {
+                type : null,
+                url : null,
+            }
         }
     }
 
@@ -168,6 +172,32 @@ ${text}`
 
     }
 
+    this.Photo = (id,url) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+
+            this.Builds[this.Builds.findIndex(e => e.id == id)].ExternalContent.type = 'photo'
+            this.Builds[this.Builds.findIndex(e => e.id == id)].ExternalContent.url = url
+
+        } else {
+            let erro
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao carregar a imagem na Func ${this.Name} | ${erro}`)
+        }
+    }
+
+    this.Video = (id,url) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+
+            this.Builds[this.Builds.findIndex(e => e.id == id)].ExternalContent.type = 'video'
+            this.Builds[this.Builds.findIndex(e => e.id == id)].ExternalContent.url = url
+
+        } else {
+            let erro
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao carregar o video na Func ${this.Name} | ${erro}`)
+        }
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {
@@ -183,7 +213,8 @@ ${text}`
                 inputPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].inputPath,
                 BroadcastList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].BroadcastList,
                 newPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].newPath,
-                newMaxFit :  this.Builds[this.Builds.findIndex(e => e.id == props.userid)].maxFit    
+                newMaxFit :  this.Builds[this.Builds.findIndex(e => e.id == props.userid)].maxFit,
+                ExternalContent : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].ExternalContent
             }
         } else {
             return {
