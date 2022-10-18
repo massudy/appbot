@@ -122,7 +122,42 @@ class AppBot extends TelegramBot {
                         console.log(`${session.userName} está inAction`)
                      }
             } else {
-                this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
+                if(!session.inAction){
+                    if(m.photo && session.waitPhoto){
+                        this.getFileLink(m.photo[m.photo.length-1].file_id)
+                        .then(link => {
+                        this.Sessions[this.SessionIndex(session.userID)].inputValue = link
+                        this.Sessions[this.SessionIndex(session.userID)].waitPhoto = false
+                        session = this.GetSession(m.from.id)
+                        this.ReloadScreen(session.photoPath,session)
+                        }).catch(e => {
+                        this.Sessions[this.SessionIndex(session.userID)].inputValue = false
+                        this.Sessions[this.SessionIndex(session.userID)].waitPhoto = false
+                        session = this.GetSession(m.from.id)
+                        this.ReloadScreen(session.photoPath,session)
+                        })
+                        
+                    } else if(m.video && session.waitVideo){
+    
+                        this.getFileLink(m.video.file_id)
+                        .then(link => {
+                        this.Sessions[this.SessionIndex(session.userID)].inputValue = link
+                        this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
+                        session = this.GetSession(m.from.id)
+                        this.ReloadScreen(session.videoPath,session)
+                        }).catch(e => {
+                        this.Sessions[this.SessionIndex(session.userID)].inputValue = false
+                        this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
+                        session = this.GetSession(m.from.id)
+                        this.ReloadScreen(session.videoPath,session)
+                        })
+
+                    } else {
+                    this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
+                    }
+                } else {
+                    console.log(`${session.userName} está inAction`)
+                 }
             }
            
         } else {
@@ -157,6 +192,8 @@ async LoadScreen(path,session = new Session,alert = null){
 this.Sessions[this.SessionIndex(session.userID)].inAction = true
 this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
 this.Sessions[this.SessionIndex(session.userID)].waitInput = false
+this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
+this.Sessions[this.SessionIndex(session.userID)].waitPhoto = false
 this.Sessions[this.SessionIndex(session.userID)].inputValue = null
 
 const filteredpath = callbackFilter(path)
@@ -270,6 +307,14 @@ if(build_object.waitInput){
     this.Sessions[this.SessionIndex(session.userID)].waitInput = true
     this.Sessions[this.SessionIndex(session.userID)].inputPath = build_object.inputPath
 }
+if(build_object.waitPhoto){
+    this.Sessions[this.SessionIndex(session.userID)].waitPhoto = true
+    this.Sessions[this.SessionIndex(session.userID)].photoPath = build_object.photoPath
+}
+if(build_object.waitVideo){
+    this.Sessions[this.SessionIndex(session.userID)].waitVideo = true
+    this.Sessions[this.SessionIndex(session.userID)].videoPath = build_object.videoPath
+}
 this.Sessions[this.SessionIndex(session.userID)].inAction = false
 }
 
@@ -374,6 +419,14 @@ ${build_object.FinalText}`
     if(build_object.waitInput){
         this.Sessions[this.SessionIndex(session.userID)].waitInput = true
         this.Sessions[this.SessionIndex(session.userID)].inputPath = build_object.inputPath
+    }
+    if(build_object.waitPhoto){
+        this.Sessions[this.SessionIndex(session.userID)].waitPhoto = true
+        this.Sessions[this.SessionIndex(session.userID)].photoPath = build_object.photoPath
+    }
+    if(build_object.waitVideo){
+        this.Sessions[this.SessionIndex(session.userID)].waitVideo = true
+        this.Sessions[this.SessionIndex(session.userID)].videoPath = build_object.videoPath
     }
     this.Sessions[this.SessionIndex(session.userID)].inAction = false
 }

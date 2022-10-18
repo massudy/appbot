@@ -12,6 +12,10 @@ class Session {
         this.ExternalContent = {
             type : null
         }
+        this.waitPhoto = false
+        this.photoPath = null
+        this.waitVideo = false
+        this.videoPath = null
     }
 }
 

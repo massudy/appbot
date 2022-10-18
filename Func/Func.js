@@ -24,6 +24,10 @@ constructor(name,linked = [],build = async (props) => {}){
                 type : null,
                 url : null,
             }
+            this.waitPhoto = false
+            this.photoPath = ''
+            this.waitVideo = false
+            this.videoPath = ''
         }
     }
 
@@ -93,12 +97,42 @@ ${text}`
     this.WaitInput = (id,inputpath = this.Name,props = {}) => {
         if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
            this.Builds[this.Builds.findIndex(e => e.id == id)].waitInput = true
+           this.Builds[this.Builds.findIndex(e => e.id == id)].waitPhoto = false
+           this.Builds[this.Builds.findIndex(e => e.id == id)].waitVideo = false
            this.Builds[this.Builds.findIndex(e => e.id == id)].inputPath = `${inputpath}${JSON.stringify(props)}`
            
         } else {
        let erro
        if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
        console.error(`Falha ao ativar o WaitInput na Func ${this.Name} | ${erro}`)
+       }
+    }
+
+    this.WaitPhoto = (id,inputpath = this.Name,props = {}) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+           this.Builds[this.Builds.findIndex(e => e.id == id)].waitInput = false
+           this.Builds[this.Builds.findIndex(e => e.id == id)].waitPhoto = true
+           this.Builds[this.Builds.findIndex(e => e.id == id)].waitVideo = false
+           this.Builds[this.Builds.findIndex(e => e.id == id)].photoPath = `${inputpath}${JSON.stringify(props)}`
+           
+        } else {
+       let erro
+       if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+       console.error(`Falha ao ativar o WaitPhoto na Func ${this.Name} | ${erro}`)
+       }
+    }
+
+    this.WaitVideo = (id,inputpath = this.Name,props = {}) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+           this.Builds[this.Builds.findIndex(e => e.id == id)].waitInput = false
+           this.Builds[this.Builds.findIndex(e => e.id == id)].waitPhoto = false
+           this.Builds[this.Builds.findIndex(e => e.id == id)].waitVideo = true
+           this.Builds[this.Builds.findIndex(e => e.id == id)].videoPath = `${inputpath}${JSON.stringify(props)}`
+           
+        } else {
+       let erro
+       if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+       console.error(`Falha ao ativar o WaitVideo na Func ${this.Name} | ${erro}`)
        }
     }
    
@@ -214,7 +248,11 @@ ${text}`
                 BroadcastList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].BroadcastList,
                 newPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].newPath,
                 newMaxFit :  this.Builds[this.Builds.findIndex(e => e.id == props.userid)].maxFit,
-                ExternalContent : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].ExternalContent
+                ExternalContent : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].ExternalContent,
+                waitPhoto : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].waitPhoto,
+                photoPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].photoPath,
+                waitVideo : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].waitVideo,
+                videoPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].videoPath,
             }
         } else {
             return {
