@@ -232,6 +232,43 @@ ${text}`
         }
     }
 
+    this.Page = async (id,name,code = async () => {},config = {PageLabel : undefined}) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+
+            if(name == this.Builds[this.Builds.findIndex(e => e.id == id)].Session.page){
+                if(config.PageLabel){
+                    this.PageLabel(id,config.PageLabel)
+                }
+                await code()
+            }
+
+
+        } else {
+            let erro
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao carregar a page ${name} | ${erro}`)
+        }
+
+    }
+
+    this.PageLabel = (id,pagelabel) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+            
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText.length){
+                this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText = `• ${pagelabel}
+            
+                ${this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText}`
+            } else {
+                this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText = `• ${pagelabel}
+`
+            }
+        }  else {
+            let erro
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao carregar a PageLabel ${pagelabel} | ${erro}`)
+        }
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {

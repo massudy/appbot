@@ -16,6 +16,7 @@ class Session {
         this.photoPath = null
         this.waitVideo = false
         this.videoPath = null
+        this.page = null
     }
 }
 
