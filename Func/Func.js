@@ -228,18 +228,25 @@ ${text}`
         } else {
             let erro
             if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
-            console.error(`Falha ao carregar o video na Func ${this.Name} | ${erro}`)
+            console.error(`Falha ao carregar o video na Func ${this.Name} | ${erro}`) 
         }
     }
 
-    this.Page = async (id,name,code = async () => {},config = {PageLabel : undefined}) => {
+    this.Page = async (id,name = '',code = async () => {},config = {pagelabel : undefined}) => {
         if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
 
             if(name == this.Builds[this.Builds.findIndex(e => e.id == id)].Session.page){
-                if(config.PageLabel){
-                    this.PageLabel(id,config.PageLabel)
+                if(config.pagelabel){
+                    this.PageLabel(id,config.pagelabel)
                 }
                 await code()
+            } else {
+                if(name.length == 0 && !this.Builds[this.Builds.findIndex(e => e.id == id)].Session.page){
+                    if(config.pagelabel){
+                        this.PageLabel(id,config.pagelabel)
+                    }
+                    await code() 
+                }
             }
 
 
