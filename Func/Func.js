@@ -36,7 +36,7 @@ constructor(name,linked = [],build = async (props) => {}){
     this.Builds = [new userBuild(0)]
 
     //Funções que preenchem texto e botões
-    this.Text = (id,text = '') => {
+    this.Text = (id,text = '',breakline = false) => {
         if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
             if(text.length < 4090){
                 if(this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText.length){
@@ -50,7 +50,8 @@ ${text}`
                 console.error(`Falha ao carregar o texto ${text.substring(0,40)} | TEXTO MUITO GRANDE`)
                 this.Builds[this.Builds.findIndex(e => e.id == id)].FullyText = 'Erro ao carregar texto'
             }
-             } else {
+            if(breakline){this.Text(id,'',false)} 
+            } else {
             let erro
             if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
             console.error(`Falha ao carregar o texto ${text} na Func ${this.Name} | ${erro}`)
