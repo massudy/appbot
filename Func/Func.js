@@ -276,6 +276,16 @@ ${text}`
         }
     }
 
+    this.IsAdmin = (id) => {
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+            return this.Builds[this.Builds.findIndex(e => e.id == id)].Session.admin
+          } else {
+            let erro
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao executar o método IsAdmin | ${erro}`) 
+        }
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {

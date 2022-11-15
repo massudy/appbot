@@ -11,7 +11,8 @@ class AppBot extends TelegramBot {
     constructor(token,mainfunc = TemplateFunc,config = {
         adjustscreen : false,
         sessions : [],
-        keywords : [{keyword : '12f34f3qf43f3q4f34',func : 'functeste',props : {}}]
+        keywords : [{keyword : '12f34f3qf43f3q4f34',func : 'functeste',props : {}}],
+        admins : []
     }){
         super(token,{polling : true})
         
@@ -26,7 +27,9 @@ class AppBot extends TelegramBot {
         this.Funcs.splice(0,1)
         this.Sessions = [new Session]
         this.Sessions.splice(0,1)
-        
+        this.Admins = []
+        if(config.admins){this.AddAdmins(config.admins)}
+    
     
         this.AddSessions(config.sessions)
 
@@ -184,6 +187,14 @@ GetSession(userid){
 return this.Sessions.find(s => s.userID == userid)
 }
 
+IsAdmin(userid){
+    if(this.Admins.includes(`${userid}`) || this.Admins.includes(userid)){
+        return true
+    } else {
+        return false
+    }
+}
+
 SessionIndex(userid){
 return this.Sessions.findIndex(e => e.userID == userid)
 }
@@ -195,6 +206,7 @@ this.Sessions[this.SessionIndex(session.userID)].waitInput = false
 this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
 this.Sessions[this.SessionIndex(session.userID)].waitPhoto = false
 this.Sessions[this.SessionIndex(session.userID)].inputValue = null
+this.Sessions[this.SessionIndex(session.userID)].admin = this.IsAdmin(session.userID)
 
 const filteredpath = callbackFilter(path)
 
@@ -337,6 +349,7 @@ this.Sessions[this.SessionIndex(session.userID)].inAction = false
 async ReloadScreen(path,session = new Session,alert = null){
     this.Sessions[this.SessionIndex(session.userID)].inAction = true
     this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
+    this.Sessions[this.SessionIndex(session.userID)].admin = this.IsAdmin(session.userID)
     const filteredpath = callbackFilter(path)
     filteredpath.props.mainfunc = this.Funcs[0].Name
     filteredpath.props.session = session
@@ -454,6 +467,8 @@ this.BroadcastList.push(...castlist)
 AddSessions(sessionlist = [new Session]){
     this.Sessions.push(...sessionlist)
 }
+
+AddAdmins(admins = []){this.Admins.push(...admins)}
 
 static Session(){return Session}
 
