@@ -351,6 +351,21 @@ async ReloadScreen(path,session = new Session,alert = null){
     this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
     this.Sessions[this.SessionIndex(session.userID)].admin = this.IsAdmin(session.userID)
     const filteredpath = callbackFilter(path)
+   
+    if(filteredpath.props.page || filteredpath.props.pg){
+        if(filteredpath.props.page){
+            session.page = filteredpath.props.page
+            this.Sessions[this.SessionIndex(session.userID)].page = filteredpath.props.page
+        }
+        if(filteredpath.props.pg){
+            session.page = filteredpath.props.pg
+            this.Sessions[this.SessionIndex(session.userID)].page = filteredpath.props.pg
+        }
+    } else {
+        session.page = null
+        this.Sessions[this.SessionIndex(session.userID)].page = null
+    }
+   
     filteredpath.props.mainfunc = this.Funcs[0].Name
     filteredpath.props.session = session
     filteredpath.props.userid = session.userID
