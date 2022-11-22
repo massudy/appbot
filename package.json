@@ -1,6 +1,6 @@
 {
   "name": "appbot",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Minimalist and Responsive TelegramBot",
   "main": "AppBot.js",
   "type": "module",
