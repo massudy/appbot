@@ -28,6 +28,7 @@ constructor(name,linked = [],build = async (props) => {}){
             this.photoPath = ''
             this.waitVideo = false
             this.videoPath = ''
+            this.AlertMessage = null
         }
     }
 
@@ -287,6 +288,26 @@ ${text}`
         }
     }
 
+    this.Alert = (id,message = '',default_emoji = true) => {
+        let erro
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+            if(message.length <= 50){
+                if(default_emoji){
+                    this.Builds[this.Builds.findIndex(e => e.id == id)].AlertMessage = `⚠️ ${message}`
+                } else {
+                    this.Builds[this.Builds.findIndex(e => e.id == id)].AlertMessage = message
+                }
+            } else {
+               erro = 'Message grande demais, máximo de 50 characters'
+                console.error(`Falha ao executar o método Alert | ${erro}`) 
+            }
+        } else {
+            
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao executar o método Alert | ${erro}`) 
+        }
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {
@@ -308,6 +329,7 @@ ${text}`
                 photoPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].photoPath,
                 waitVideo : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].waitVideo,
                 videoPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].videoPath,
+                Alert : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].AlertMessage
             }
         } else {
             return {

@@ -237,6 +237,11 @@ build_object = await func.Build(filteredpath.props)
     const notfounded = new NotFounded()
     build_object = await notfounded.Build(filteredpath.props)
 }
+
+if(build_object.Alert){
+    alert = build_object.Alert
+}
+
 if(alert){
     build_object.FinalText = `${alert}
     
@@ -382,6 +387,11 @@ async ReloadScreen(path,session = new Session,alert = null){
         reply_markup : build_object.FinalButtons.reply_markup,
         parse_mode : "Markdown"
     }
+
+    if(build_object.Alert){
+        alert = build_object.Alert
+    }
+
     if(alert){
         build_object.FinalText = `${alert}
         
