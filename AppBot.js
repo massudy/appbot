@@ -35,6 +35,8 @@ class AppBot extends TelegramBot {
         this.WhiteList.splice(0,1)
         this.BlackList = [new idrule()]
         this.BlackList.splice(0,1)
+        
+        this.AdjustScreen = config.adjustscreen
 
         if(config.admins){this.AddAdmins(config.admins)}
         if(config.blacklist){this.BlackLists.Add(config.blacklist)}
@@ -95,7 +97,7 @@ class AppBot extends TelegramBot {
                    
                     this.Sessions.push(new Session(c.from.id,c.from.first_name))
                     session = this.GetSession(c.from.id)
-                    if(config.adjustscreen && !session.maxFit){
+                    if(this.AdjustScreen && !session.maxFit){
                         this.ReloadScreen('adjustscreen',session)
                     } else {
                         this.ReloadScreen(this.Funcs[0].Name,session)
@@ -184,7 +186,7 @@ class AppBot extends TelegramBot {
                         }
                         this.Sessions.push(new Session(m.from.id,m.from.first_name))
                     session = this.GetSession(m.from.id)
-                    if(config.adjustscreen && !session.maxFit){
+                    if(this.AdjustScreen && !session.maxFit){
                         this.ReloadScreen('adjustscreen',session)
                     } else {
                         this.ReloadScreen(this.Funcs[0].Name,session)
@@ -563,6 +565,19 @@ BlackLists = {
         })
     },
     View : () => {return this.BlackList}
+}
+
+GetConfig(){
+    const Config_Object = {
+        adjustscreen : this.AdjustScreen,
+        sessions : this.Sessions,
+        keywords : this.Keywords,
+        admins : this.Admins,
+        whitelist : this.WhiteList,
+        blacklist : this.BlackList
+    }
+
+    return Config_Object
 }
 
 static ID_Rule(id,date = '',action = async () => {}){return new idrule(id,date,action)}
