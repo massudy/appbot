@@ -2,6 +2,7 @@ import Button from "./Button.js"
 import Cast from "../Config/Cast.js"
 import Session from "../Config/Session.js"
 import Spacing from "./Spacing.js"
+import idrule from "../Config/idrule.js"
 class Func {
 constructor(name,linked = [],build = async (props) => {}){
     
@@ -29,6 +30,14 @@ constructor(name,linked = [],build = async (props) => {}){
             this.waitVideo = false
             this.videoPath = ''
             this.AlertMessage = null
+            this.WhiteList = {
+                addlist : [],
+                removelist : []
+            }
+            this.BlackList = {
+                addlist : [],
+                removelist : []
+            }
         }
     }
 
@@ -308,6 +317,47 @@ ${text}`
         }
     }
 
+    this.WhiteLists = {
+        Add : (id,idrule_list = [new idrule()]) => {
+            let erro
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                this.Builds[this.Builds.findIndex(e => e.id == id)].WhiteList.addlist.push(...idrule_list)
+            } else {
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao executar o método Whitelists.add() | ${erro}`)   
+            }
+        },
+        Remove : (id,ids_list = ['']) => {
+            let erro
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                this.Builds[this.Builds.findIndex(e => e.id == id)].WhiteList.removelist.push(...ids_list)
+            } else {
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao executar o método Whitelists.remove() | ${erro}`)   
+            }
+        }
+    }
+    this.BlackLists = {
+        Add : (id,idrule_list = [new idrule()]) => {
+            let erro
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                this.Builds[this.Builds.findIndex(e => e.id == id)].BlackList.addlist.push(...idrule_list)
+            } else {
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao executar o método Blacklists.add() | ${erro}`)   
+            }
+        },
+        Remove : (id,ids_list = ['']) => {
+            let erro
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                this.Builds[this.Builds.findIndex(e => e.id == id)].BlackList.removelist.push(...ids_list)
+            } else {
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao executar o método Blacklists.remove() | ${erro}`)   
+            }
+        }
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {
@@ -329,7 +379,9 @@ ${text}`
                 photoPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].photoPath,
                 waitVideo : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].waitVideo,
                 videoPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].videoPath,
-                Alert : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].AlertMessage
+                Alert : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].AlertMessage,
+                BlackList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].BlackList,
+                WhiteList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].WhiteList
             }
         } else {
             return {

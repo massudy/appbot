@@ -6,13 +6,16 @@ import NotFounded from "./Func/NotFounded.js";
 import TemplateFunc from "./Func/TemplateFunc.js";
 import Cast from "./Config/Cast.js";
 import AdjustScreen from "./Func/AdjustScreen.js";
+import idrule from "./Config/idrule.js";
 
 class AppBot extends TelegramBot {
     constructor(token,mainfunc = TemplateFunc,config = {
         adjustscreen : false,
         sessions : [],
         keywords : [{keyword : '12f34f3qf43f3q4f34',func : 'functeste',props : {}}],
-        admins : []
+        admins : [],
+        whitelist : [],
+        blacklist : []
     }){
         super(token,{polling : true})
         
@@ -28,7 +31,14 @@ class AppBot extends TelegramBot {
         this.Sessions = [new Session]
         this.Sessions.splice(0,1)
         this.Admins = []
+        this.WhiteList = [new idrule()]
+        this.WhiteList.splice(0,1)
+        this.BlackList = [new idrule()]
+        this.BlackList.splice(0,1)
+
         if(config.admins){this.AddAdmins(config.admins)}
+        if(config.blacklist){this.BlackLists.Add(config.blacklist)}
+        if(config.whitelist){this.WhiteLists.Add(config.whitelist)}
     
     
         this.AddSessions(config.sessions)
@@ -73,110 +83,117 @@ class AppBot extends TelegramBot {
         
         
         this.on('callback_query',(c) => {
-            let session = this.GetSession(c.from.id)
-            if(session){
-                this.LoadScreen(c.data,session)
-            } else {
-                for(let i = c.message.message_id-20;i<=c.message.message_id;i++){
-                    this.deleteMessage(c.from.id,i).catch(e => {})
-                }
-               
-                this.Sessions.push(new Session(c.from.id,c.from.first_name))
-                session = this.GetSession(c.from.id)
-                if(config.adjustscreen && !session.maxFit){
-                    this.ReloadScreen('adjustscreen',session)
-                } else {
-                    this.ReloadScreen(this.Funcs[0].Name,session)
-                }
-                
-            }
             
+            if(this.ID_Verify(c.from.id)){
+                let session = this.GetSession(c.from.id)
+                if(session){
+                    this.LoadScreen(c.data,session)
+                } else {
+                    for(let i = c.message.message_id-20;i<=c.message.message_id;i++){
+                        this.deleteMessage(c.from.id,i).catch(e => {})
+                    }
+                   
+                    this.Sessions.push(new Session(c.from.id,c.from.first_name))
+                    session = this.GetSession(c.from.id)
+                    if(config.adjustscreen && !session.maxFit){
+                        this.ReloadScreen('adjustscreen',session)
+                    } else {
+                        this.ReloadScreen(this.Funcs[0].Name,session)
+                    }
+                    
+                }
+            }
         })
 
 
         this.on('message',async (m) => {
-        
-        if(m.chat.type == 'private'){
-        let session = this.GetSession(m.from.id)
-        if(session){
-            if(m.text){
-                if(!session.inAction){
-                    if(session.waitInput){
-                        this.Sessions[this.SessionIndex(session.userID)].inputValue = m.text
-                        this.Sessions[this.SessionIndex(session.userID)].waitInput = false
-                        session = this.GetSession(m.from.id)
-                        this.ReloadScreen(session.inputPath,session)
-                    } else {
-                        let find_keyword = this.Keywords.find(kw => kw.keyword == m.text)
-                        if(find_keyword){
-                        session = this.GetSession(m.from.id)
-                        if(find_keyword.props){
-                        this.ReloadScreen(`${find_keyword.func}${JSON.stringify(find_keyword.props)}`,session)
-                        }else {
-                        this.ReloadScreen(find_keyword.func,session)
-                        }
-                        
-                        } else {
-                        this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
-                        }
-                        
-                    }
-                     } else {
-                        console.log(`${session.userName} está inAction`)
-                     }
-            } else {
-                if(!session.inAction){
-                    if(m.photo && session.waitPhoto){
-                        this.getFileLink(m.photo[m.photo.length-1].file_id)
-                        .then(link => {
-                        this.Sessions[this.SessionIndex(session.userID)].inputValue = link
-                        this.Sessions[this.SessionIndex(session.userID)].waitPhoto = false
-                        session = this.GetSession(m.from.id)
-                        this.ReloadScreen(session.photoPath,session)
-                        }).catch(e => {
-                        this.Sessions[this.SessionIndex(session.userID)].inputValue = false
-                        this.Sessions[this.SessionIndex(session.userID)].waitPhoto = false
-                        session = this.GetSession(m.from.id)
-                        this.ReloadScreen(session.photoPath,session)
-                        })
-                        
-                    } else if(m.video && session.waitVideo){
-    
-                        this.getFileLink(m.video.file_id)
-                        .then(link => {
-                        this.Sessions[this.SessionIndex(session.userID)].inputValue = link
-                        this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
-                        session = this.GetSession(m.from.id)
-                        this.ReloadScreen(session.videoPath,session)
-                        }).catch(e => {
-                        this.Sessions[this.SessionIndex(session.userID)].inputValue = false
-                        this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
-                        session = this.GetSession(m.from.id)
-                        this.ReloadScreen(session.videoPath,session)
-                        })
+            
+            if(this.ID_Verify(m.from.id)){
 
+                if(m.chat.type == 'private'){
+            
+                    let session = this.GetSession(m.from.id)
+                    if(session){
+                        if(m.text){
+                            if(!session.inAction){
+                                if(session.waitInput){
+                                    this.Sessions[this.SessionIndex(session.userID)].inputValue = m.text
+                                    this.Sessions[this.SessionIndex(session.userID)].waitInput = false
+                                    session = this.GetSession(m.from.id)
+                                    this.ReloadScreen(session.inputPath,session)
+                                } else {
+                                    let find_keyword = this.Keywords.find(kw => kw.keyword == m.text)
+                                    if(find_keyword){
+                                    session = this.GetSession(m.from.id)
+                                    if(find_keyword.props){
+                                    this.ReloadScreen(`${find_keyword.func}${JSON.stringify(find_keyword.props)}`,session)
+                                    }else {
+                                    this.ReloadScreen(find_keyword.func,session)
+                                    }
+                                    
+                                    } else {
+                                    this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
+                                    }
+                                    
+                                }
+                                 } else {
+                                    console.log(`${session.userName} está inAction`)
+                                 }
+                        } else {
+                            if(!session.inAction){
+                                if(m.photo && session.waitPhoto){
+                                    this.getFileLink(m.photo[m.photo.length-1].file_id)
+                                    .then(link => {
+                                    this.Sessions[this.SessionIndex(session.userID)].inputValue = link
+                                    this.Sessions[this.SessionIndex(session.userID)].waitPhoto = false
+                                    session = this.GetSession(m.from.id)
+                                    this.ReloadScreen(session.photoPath,session)
+                                    }).catch(e => {
+                                    this.Sessions[this.SessionIndex(session.userID)].inputValue = false
+                                    this.Sessions[this.SessionIndex(session.userID)].waitPhoto = false
+                                    session = this.GetSession(m.from.id)
+                                    this.ReloadScreen(session.photoPath,session)
+                                    })
+                                    
+                                } else if(m.video && session.waitVideo){
+                
+                                    this.getFileLink(m.video.file_id)
+                                    .then(link => {
+                                    this.Sessions[this.SessionIndex(session.userID)].inputValue = link
+                                    this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
+                                    session = this.GetSession(m.from.id)
+                                    this.ReloadScreen(session.videoPath,session)
+                                    }).catch(e => {
+                                    this.Sessions[this.SessionIndex(session.userID)].inputValue = false
+                                    this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
+                                    session = this.GetSession(m.from.id)
+                                    this.ReloadScreen(session.videoPath,session)
+                                    })
+            
+                                } else {
+                                this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
+                                }
+                            } else {
+                                console.log(`${session.userName} está inAction`)
+                             }
+                        }
+                       
                     } else {
-                    this.ReloadScreen(session.actualScreen,session,`⚠️ *Utilize apenas os botões*`)
+                        for(let i = m.message_id-20;i<=m.message_id;i++){
+                            this.deleteMessage(m.from.id,i).catch(e => {})
+                        }
+                        this.Sessions.push(new Session(m.from.id,m.from.first_name))
+                    session = this.GetSession(m.from.id)
+                    if(config.adjustscreen && !session.maxFit){
+                        this.ReloadScreen('adjustscreen',session)
+                    } else {
+                        this.ReloadScreen(this.Funcs[0].Name,session)
                     }
-                } else {
-                    console.log(`${session.userName} está inAction`)
-                 }
+                    
+                      }
+                    }
+
             }
-           
-        } else {
-            for(let i = m.message_id-20;i<=m.message_id;i++){
-                this.deleteMessage(m.from.id,i).catch(e => {})
-            }
-            this.Sessions.push(new Session(m.from.id,m.from.first_name))
-        session = this.GetSession(m.from.id)
-        if(config.adjustscreen && !session.maxFit){
-            this.ReloadScreen('adjustscreen',session)
-        } else {
-            this.ReloadScreen(this.Funcs[0].Name,session)
-        }
-        
-          }
-        }
 
         })
 
@@ -336,6 +353,12 @@ if(build_object.newMaxFit){
     this.Sessions[this.SessionIndex(session.userID)].maxFit = build_object.newMaxFit
 }
 
+if(build_object.BlackList.addlist.length){this.BlackLists.Add(build_object.BlackList.addlist)}
+if(build_object.BlackList.removelist.length){this.BlackLists.Remove(build_object.BlackList.removelist)}
+if(build_object.WhiteList.addlist.length){this.WhiteLists.Add(build_object.WhiteList.addlist)}
+if(build_object.WhiteList.removelist.length){this.WhiteLists.Remove(build_object.WhiteList.removelist)}
+
+
 if(build_object.waitInput){
     this.Sessions[this.SessionIndex(session.userID)].waitInput = true
     this.Sessions[this.SessionIndex(session.userID)].inputPath = build_object.inputPath
@@ -485,6 +508,14 @@ ${build_object.FinalText}`
     this.Sessions[this.SessionIndex(session.userID)].inAction = false
 }
 
+ID_Verify(id){
+if(this.WhiteList.length){
+if(this.WhiteList.findIndex(idrule => idrule.ID == id) != -1){return true} else {return false}
+} else {
+if(this.BlackList.findIndex(idrule => idrule.ID == id) == -1){return true} else {return false}
+}
+}
+
 Broadcast(castlist = [new Cast]){
 this.BroadcastList.push(...castlist)
 }
@@ -494,6 +525,47 @@ AddSessions(sessionlist = [new Session]){
 }
 
 AddAdmins(admins = []){this.Admins.push(...admins)}
+
+WhiteLists = {
+    Add : (idrule_list = [new idrule()]) => {
+        idrule_list.forEach(id_rule => {
+            if(this.WhiteList.findIndex(idrule => idrule.ID == id_rule.ID) == -1){
+                this.WhiteList.push(id_rule)
+            }
+        })
+        
+    },
+    Remove : (ids_list = ['']) => {
+        ids_list.forEach(id => {
+            const index = this.WhiteList.findIndex(idrule => idrule.ID == id)
+            if(index != -1){
+                this.WhiteList.splice(index,1)
+            }
+        })
+    },
+    View : () => {return this.WhiteList}
+}
+BlackLists = {
+    Add : (idrule_list = [new idrule()]) => {
+        idrule_list.forEach(id_rule => {
+            if(this.BlackList.findIndex(idrule => idrule.ID == id_rule.ID) == -1){
+                this.BlackList.push(id_rule)
+            }
+        })
+       
+    },
+    Remove : (ids_list = ['']) => {
+        ids_list.forEach(id => {
+            const index = this.BlackList.findIndex(idrule => idrule.ID == id)
+            if(index != -1){
+                this.BlackList.splice(index,1)
+            }
+        })
+    },
+    View : () => {return this.BlackList}
+}
+
+static ID_Rule(id,date = '',action = async () => {}){return new idrule(id,date,action)}
 
 static Session(){return Session}
 
