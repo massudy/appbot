@@ -482,6 +482,15 @@ ${build_object.FinalText}`
     if(session.inputValue){
         this.Sessions[this.SessionIndex(session.userID)].inputValue = null
     }
+
+    if(build_object.NewRoles){
+        build_object.NewRoles.forEach(nr => {
+            if(this.SessionIndex(nr.id) != -1){
+                this.Sessions[this.SessionIndex(nr.id)].role = nr.newrole
+            }
+            
+        })
+    }
     
     if(build_object.newMaxFit){
         this.Sessions[this.SessionIndex(session.userID)].maxFit = build_object.newMaxFit

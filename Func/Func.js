@@ -38,6 +38,8 @@ constructor(name,linked = [],build = async (props) => {}){
                 addlist : [],
                 removelist : []
             }
+            this.NewRoles = [{id : '',newrole : ''}]
+            this.NewRoles.splice(0,1)
         }
     }
 
@@ -358,6 +360,32 @@ ${text}`
         }
     }
 
+    this.Role = {
+        Check : (id,role) => {
+            let erro
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                if(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.role == role){
+                    return true
+                } else {return false}
+            } else {
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao executar o método Role.Check | ${erro}`)   
+            }
+        },
+        Set : (id,id_to_set,role) => {
+            let erro
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                if(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.admin){
+                    this.Builds[this.Builds.findIndex(e => e.id == id)].NewRoles.push({id : id_to_set,newrole : role})
+                    return true
+                } else {return false}
+            } else {
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao executar o método Role.Set | ${erro}`)   
+            }
+        }
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {
@@ -381,7 +409,8 @@ ${text}`
                 videoPath : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].videoPath,
                 Alert : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].AlertMessage,
                 BlackList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].BlackList,
-                WhiteList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].WhiteList
+                WhiteList : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].WhiteList,
+                NewRoles : this.Builds[this.Builds.findIndex(e => e.id == props.userid)].NewRoles
             }
         } else {
             return {

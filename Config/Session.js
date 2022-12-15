@@ -1,5 +1,5 @@
 class Session {
-    constructor(userid,username,config = {maxfit : undefined}){
+    constructor(userid,username,config = {maxfit : undefined, role : undefined}){
         this.userID = userid
         this.userName = username
         this.waitInput = false
@@ -18,6 +18,7 @@ class Session {
         this.videoPath = null
         this.page = null
         this.admin = false
+        this.role = config.role || 'user'
     }
 }
 
