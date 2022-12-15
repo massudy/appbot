@@ -341,7 +341,14 @@ ${build_object.FinalText}`
     this.editMessageText(build_object.FinalText,config).catch((e) => { })
 }
 
-
+if(build_object.NewRoles){
+    build_object.NewRoles.forEach(nr => {
+        if(this.SessionIndex(nr.id) != -1){
+            this.Sessions[this.SessionIndex(nr.id)].role = nr.newrole
+        }
+        
+    })
+}
 
 if(build_object.newPath){
     this.Sessions[this.SessionIndex(session.userID)].actualScreen = build_object.newPath
