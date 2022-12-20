@@ -7,6 +7,7 @@ import TemplateFunc from "./Func/TemplateFunc.js";
 import Cast from "./Config/Cast.js";
 import AdjustScreen from "./Func/AdjustScreen.js";
 import idrule from "./Config/idrule.js";
+import AppBot_Emitter from "./Events.js";
 
 class AppBot extends TelegramBot {
     constructor(token,mainfunc = TemplateFunc,config = {
@@ -23,6 +24,8 @@ class AppBot extends TelegramBot {
             console.error('ERROR - Mainfunc não carregada... | Iniciando com uma TemplateFunc')
         }
        
+        this.Emitter = new AppBot_Emitter()
+
         this.Keywords = []
         if(config.keywords){this.Keywords.push(...config.keywords)}
         this.Token = token
@@ -82,7 +85,6 @@ class AppBot extends TelegramBot {
         }
         this.Funcs.push(...funcs)
     
-        
         
         this.on('callback_query',(c) => {
             
@@ -218,8 +220,24 @@ SessionIndex(userid){
 return this.Sessions.findIndex(e => e.userID == userid)
 }
 
+FuncLoaded(info = {
+    func : '',
+    type : '',
+    time : 0,
+    page : ''
+}){
+    if(info.func && info.type && info.time >= 0){
+        if(typeof info.time != Number){info.time = Number(info.time)}
+        this.Emitter.emit('FuncLoaded',info)
+    }
+    
+}
+
 async LoadScreen(path,session = new Session,alert = null){
 this.Sessions[this.SessionIndex(session.userID)].inAction = true
+let startTime = performance.now()
+let loadinfo = {type : 'loadscreen'}
+
 this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
 this.Sessions[this.SessionIndex(session.userID)].waitInput = false
 this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
@@ -231,10 +249,12 @@ const filteredpath = callbackFilter(path)
 
 if(filteredpath.props.page || filteredpath.props.pg){
     if(filteredpath.props.page){
+        loadinfo.page = filteredpath.props.page
         session.page = filteredpath.props.page
         this.Sessions[this.SessionIndex(session.userID)].page = filteredpath.props.page
     }
     if(filteredpath.props.pg){
+        loadinfo.page = filteredpath.props.pg
         session.page = filteredpath.props.pg
         this.Sessions[this.SessionIndex(session.userID)].page = filteredpath.props.pg
     }
@@ -251,10 +271,12 @@ filteredpath.props.token = this.Token
 const func = this.Funcs.find(f => f.Name == filteredpath.path)
 let build_object
 if(func){
+loadinfo.func = filteredpath.path
 build_object = await func.Build(filteredpath.props)
 } else {
-    const notfounded = new NotFounded()
-    build_object = await notfounded.Build(filteredpath.props)
+loadinfo.func = 'notfounded'
+const notfounded = new NotFounded()
+build_object = await notfounded.Build(filteredpath.props)
 }
 
 if(build_object.Alert){
@@ -381,20 +403,30 @@ if(build_object.waitVideo){
     this.Sessions[this.SessionIndex(session.userID)].videoPath = build_object.videoPath
 }
 this.Sessions[this.SessionIndex(session.userID)].inAction = false
+let endTime = performance.now()
+let totaltime = (endTime-startTime).toFixed(2)
+loadinfo.time = totaltime
+if(!loadinfo.page){loadinfo.page = ''}
+this.FuncLoaded(loadinfo)
 }
 
 async ReloadScreen(path,session = new Session,alert = null){
     this.Sessions[this.SessionIndex(session.userID)].inAction = true
+    let startTime = performance.now()
+    let loadinfo = {type : 'reloadscreen'}
+
     this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
     this.Sessions[this.SessionIndex(session.userID)].admin = this.IsAdmin(session.userID)
     const filteredpath = callbackFilter(path)
    
     if(filteredpath.props.page || filteredpath.props.pg){
         if(filteredpath.props.page){
+            loadinfo.page = filteredpath.props.page
             session.page = filteredpath.props.page
             this.Sessions[this.SessionIndex(session.userID)].page = filteredpath.props.page
         }
         if(filteredpath.props.pg){
+            loadinfo.page = filteredpath.props.pg
             session.page = filteredpath.props.pg
             this.Sessions[this.SessionIndex(session.userID)].page = filteredpath.props.pg
         }
@@ -410,8 +442,10 @@ async ReloadScreen(path,session = new Session,alert = null){
     const func = this.Funcs.find(f => f.Name == filteredpath.path)
     let build_object
     if(func){
+    loadinfo.func = filteredpath.path
     build_object = await func.Build(filteredpath.props)
      } else {
+        loadinfo.func = 'notfounded'
         const notfounded = new NotFounded()
         build_object = await notfounded.Build(filteredpath.props)
        }
@@ -524,6 +558,11 @@ ${build_object.FinalText}`
         this.Sessions[this.SessionIndex(session.userID)].videoPath = build_object.videoPath
     }
     this.Sessions[this.SessionIndex(session.userID)].inAction = false
+    let endTime = performance.now()
+    let totaltime = (endTime-startTime).toFixed(2)
+    loadinfo.time = totaltime
+    if(!loadinfo.page){loadinfo.page = ''}
+    this.FuncLoaded(loadinfo)
 }
 
 ID_Verify(id){
