@@ -3,6 +3,73 @@ import Cast from "../Config/Cast.js"
 import Session from "../Config/Session.js"
 import Spacing from "./Spacing.js"
 import idrule from "../Config/idrule.js"
+import callbackFilter from "../Config/callbackFilter.js"
+
+const BuildPagination = (fullarray = [], items_per_page = 5) => {
+    let pagination = [{
+         page : 1,
+         list : []
+     }]
+     pagination.splice(0,1)
+     
+     let object_model = {}
+     let count = 0
+     let type = typeof fullarray[0]
+     
+ 
+     fullarray.forEach((t,index) => {
+         if (count == 0) {
+             if(index == 0){
+                 type = typeof t
+                 if(typeof t == 'object'){
+                     object_model = t
+                 }
+             }
+             if(typeof t == type){
+                 if(typeof t == 'object'){
+                    let fullinclude = true
+                    Object.keys(t).forEach(k => {
+                        if(!Object.keys(object_model).includes(k)){
+                            fullinclude = false
+                        }
+                    })
+                     if(fullinclude){
+                         pagination.push({ page: pagination.length + 1, list: [] })
+                     pagination[pagination.length - 1].list.push(t)
+                     count += 1
+                     }
+                 } else {
+                    pagination.push({ page: pagination.length + 1, list: [] })
+                     pagination[pagination.length - 1].list.push(t)
+                     count += 1
+                 }
+                 
+             }
+             
+         } else {
+             if(typeof t == type){
+                 if(typeof t == 'object'){
+                    let fullinclude = true
+                    Object.keys(t).forEach(k => {
+                        if(!Object.keys(object_model).includes(k)){
+                            fullinclude = false
+                        }
+                    })
+                     if(fullinclude){
+                     pagination[pagination.length - 1].list.push(t)
+                     count += 1
+                     }
+                 } else {
+                     pagination[pagination.length - 1].list.push(t)
+                     count += 1
+                 }
+             }
+         }
+         
+         if (count == items_per_page) { count = 0 }
+     })
+ return pagination
+ }
 class Func {
 constructor(name,linked = [],build = async (props) => {}){
     
@@ -382,6 +449,133 @@ ${text}`
             } else {
                 if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
                 console.error(`Falha ao executar o método Role.Set | ${erro}`)   
+            }
+        }
+    }
+
+    this.Pagination = {
+        Button : (id,array,page,config = {
+            itens_per_page : 5,
+            button : {
+                text : [{type : 'text',value : 'text1'},{type : 'key',value : 'ID'}],
+                path : {type : 'text',value : 'path1'},
+                props : [{props_key : 'id',value_type : 'text', value : 'ID'}]
+                },
+            template_config : true
+        }) => {
+            let erro
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                //buildpagination
+                let per_page = 5
+                if(config.itens_per_page){if(config.itens_per_page != 5){per_page = config.itens_per_page}}
+                let Pagination = BuildPagination(array,per_page)
+                
+                
+                //build array of buttons
+                let buttons_array = [{text : '',path : '', props : {}}]
+                buttons_array.splice(0,1)
+                if(config.button && !config.template_config){
+                    console.log('Vamos configurar os botões dinamicamente')
+
+                    Pagination[Pagination.findIndex(p => p.page == page)].list.forEach(list_instance => {
+                        //buildtext
+                        let fulltext = ''
+                        config.button.text.forEach(text => {
+                            switch (text.type) {
+                                case 'text':
+                                fulltext = `${fulltext}${text.value}`    
+                                break;
+                                
+                                case 'key':
+                                if(typeof list_instance == 'object'){
+                                    if(list_instance[text.value]){
+                                        fulltext = `${fulltext}${list_instance[text.value]}`
+                                    }
+                                }
+                                break;
+
+                                default:
+                                break;
+                            }
+                        })
+                        
+                        //buildpath
+                        let fullpath = ''
+                        switch (config.button.path.type) {
+                            case 'text':
+                                fullpath = config.button.path.value 
+                                break;
+                        
+                                case 'key':
+                                    if(typeof list_instance == 'object'){
+                                        if(list_instance[config.button.path.value]){
+                                           fullpath = list_instance[config.button.path.value]
+                                        }
+                                    }
+                                    break;
+
+                            default:
+                                break;
+                        }
+
+
+                        //buildprops
+                        let fullprops = {}
+                        if(config.button.props){
+                            config.button.props.forEach(prop => {
+                                switch (prop.value_type) {
+                                    case 'text':
+                                    fullprops[prop.props_key] = prop.value
+                                    break;
+                            
+                                    case 'key':
+                                        if(typeof list_instance == 'object'){
+                                            if(list_instance[prop.value]){
+                                                fullprops[prop.props_key] = list_instance[prop.value]
+                                            }
+                                        }
+                                        break;
+                                
+                                    default:
+                                        break;
+                                }
+                            })
+                        }
+                       
+
+                        //pushbutton
+                        buttons_array.push({text : fulltext,path : fullpath, props : fullprops})
+                    })
+
+                } else {
+                    let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
+                    Pagination[Pagination.findIndex(p => p.page == page)].list.forEach(list_instance => {
+                        if(typeof list_instance == 'object'){
+                            buttons_array.push({text : `${Object.keys(list_instance).at(0)} : ${list_instance[Object.keys(list_instance).at(0)]}`,path : actual.path,props : actual.props })
+                        } else {
+                            buttons_array.push({text : list_instance,path : actual.path,props : actual.props })
+                        }
+                    })
+                }
+
+                //load buttons
+                buttons_array.forEach(b => {
+                    this.Button(id,b.text,b.path,b.props)
+                })
+            
+        
+        } else {
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao executar o método Paginaton.Button | ${erro}`)   
+            }
+        },
+        Text : (id,array,page,config = {}) => {
+            let erro
+            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+
+            } else {
+                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+                console.error(`Falha ao executar o método Paginaton.Text | ${erro}`)   
             }
         }
     }
