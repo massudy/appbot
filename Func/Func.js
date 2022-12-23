@@ -114,6 +114,17 @@ constructor(name,linked = [],build = async (props) => {}){
     //array de builds, a cada build é criado um objeto build em branco que é preenchido com a função build() da funcionalidade e depois é removida
     this.Builds = [new userBuild(0)]
 
+    //array de paginations e suas informações de indentificação
+    this.PaginationStorage = [{
+        userid : '',
+        type : '',
+        tag : '',
+        
+
+    }]
+
+   
+
     //Funções que preenchem texto e botões
     this.Text = (id,text = '',breakline = false) => {
         if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
@@ -454,7 +465,8 @@ ${text}`
     }
 
     this.Pagination = {
-        Button : (id,array,page,config = {
+        Button : (id,array = [],config = {
+            actual_page : 1,
             itens_per_page : 5,
             button : {
                 text : [{type : 'text',value : 'text1'},{type : 'key',value : 'ID'}],
@@ -463,12 +475,33 @@ ${text}`
                 },
             template_config : true
         }) => {
+            let page = 1
+            if(config.actual_page){page = config.actual_page}
+            let objreturn = {
+                actual_page : page,
+                total_pages : 0
+            }
             let erro
             if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
                 //buildpagination
+               
                 let per_page = 5
                 if(config.itens_per_page){if(config.itens_per_page != 5){per_page = config.itens_per_page}}
                 let Pagination = BuildPagination(array,per_page)
+                let keytag = undefined
+
+
+                if(Pagination.length){
+                    if(key){}
+                }
+
+                if(page > Pagination.length) {
+                    page = Pagination.length
+                    objreturn.actual_page = page
+                } else if (page < 1){
+                    page = 1
+                    objreturn.actual_page = 1
+                }
                 
                 
                 //build array of buttons
@@ -549,13 +582,17 @@ ${text}`
 
                 } else {
                     let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
-                    Pagination[Pagination.findIndex(p => p.page == page)].list.forEach(list_instance => {
-                        if(typeof list_instance == 'object'){
-                            buttons_array.push({text : `${Object.keys(list_instance).at(0)} : ${list_instance[Object.keys(list_instance).at(0)]}`,path : actual.path,props : actual.props })
-                        } else {
-                            buttons_array.push({text : list_instance,path : actual.path,props : actual.props })
-                        }
-                    })
+                    
+                    if(Pagination.length){
+                        objreturn.total_pages = Pagination.length
+                        Pagination[Pagination.findIndex(p => p.page == page)].list.forEach(list_instance => {
+                            if(typeof list_instance == 'object'){
+                                buttons_array.push({text : `${Object.keys(list_instance).at(0)} : ${list_instance[Object.keys(list_instance).at(0)]}`,path : actual.path,props : actual.props })
+                            } else {
+                                buttons_array.push({text : list_instance,path : actual.path,props : actual.props })
+                            }
+                        })
+                    }
                 }
 
                 //load buttons
@@ -568,6 +605,7 @@ ${text}`
                 if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
                 console.error(`Falha ao executar o método Paginaton.Button | ${erro}`)   
             }
+        return objreturn
         },
         Text : (id,array,page,config = {}) => {
             let erro
