@@ -469,7 +469,6 @@ ${text}`
                 },
             template_config : true
         }) => {
-            
             let page = 1
             let objreturn = {
                 actual_page : page,
@@ -477,9 +476,10 @@ ${text}`
             }
             let erro
             if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+                let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
+                
                 //buildpagination
-               
-                let per_page = 5
+               let per_page = 5
                 if(config.itens_per_page){if(config.itens_per_page != 5){per_page = config.itens_per_page}}
                 let Pagination = BuildPagination(array,per_page)
                 objreturn.total_pages = Pagination.length
@@ -489,7 +489,10 @@ ${text}`
                 if(this.userStorage[id]){
                     if(this.userStorage[id][`Paginations`]){
                        let pagination_storage = this.userStorage[id][`Paginations`].find(p => p.Pagination == JSON.stringify(Pagination))
-                       if(pagination_storage){page = pagination_storage.Page}
+                       if(pagination_storage){
+                        page = pagination_storage.Page
+                        pagination_id = pagination_storage.ID
+                    }
                     } else {
                         pagination_id = CodeGenerator.AlfaNumeric(3)
                         this.userStorage[id][`Paginations`] = []
@@ -532,14 +535,11 @@ ${text}`
                 
                 //build array of buttons
                 let buttons_array = [{text : '',path : '', props : {}}]
+                let sides = []
                 buttons_array.splice(0,1)
                 if(config.button && !config.template_config){
-                    console.log('Vamos configurar os botões dinamicamente')
-                    let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
-
+                    
                     Pagination[Pagination.findIndex(p => p.page == page)].list.forEach(list_instance => {
-                        console.log('fazendo uma instancia')
-                        console.log(buttons_array)
                         let fulltext = ''
                         let fullpath = ''
                         let fullprops = {}
@@ -630,13 +630,12 @@ ${text}`
                        
 
                         //pushbutton
-                       console.log(buttons_array.push({text : fulltext,path : fullpath, props : fullprops}))
+                       buttons_array.push({text : fulltext,path : fullpath, props : fullprops})
                     })
 
                 } else {
-                    let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
                     
-                    if(Pagination.length){
+                if(Pagination.length){
                         objreturn.total_pages = Pagination.length
                         Pagination[Pagination.findIndex(p => p.page == page)].list.forEach(list_instance => {
                             if(typeof list_instance == 'object'){
@@ -648,10 +647,25 @@ ${text}`
                     }
                 }
 
+                //sidebuttons para passar página
+               objreturn.actual_page = page
+                if(objreturn.actual_page > 1){
+                    let prev_props = actual.props
+                    prev_props.pid = `p${pagination_id}`
+                    sides.push(this.SideButton(`⇦ Página ${objreturn.actual_page-1}`,actual.path,prev_props))
+                }
+                if(objreturn.actual_page < objreturn.total_pages){
+                    let next_props = actual.props
+                    next_props.pid = `n${pagination_id}`
+                    sides.push(this.SideButton(`Página ${objreturn.actual_page+1} ⇨`,actual.path,next_props))
+                }
+
+
                 //load buttons
                 buttons_array.forEach(b => {
                     this.Button(id,b.text,b.path,b.props)
                 })
+                this.Buttons(id,sides)
             
         
         } else {
@@ -675,6 +689,23 @@ ${text}`
     this.Build = async (props) => { 
        try {
         this.Builds.push(new userBuild(props.userid,props.session))
+        if(props.pid){
+            let addpage = 0
+            const type = props.pid.slice(0,1)
+            if(type == 'n'){addpage = 1} else {addpage = -1}
+            const pagination_id = props.pid.slice(1)  
+            if(this.userStorage[props.userid]){
+                if(this.userStorage[props.userid][`Paginations`]){
+                   let pagination_index = this.userStorage[props.userid][`Paginations`].findIndex(p => p.ID == pagination_id)
+                   if(pagination_index != -1){this.userStorage[props.userid][`Paginations`].at(pagination_index).Page += addpage}
+                }
+            }    
+        delete props[`pid`]
+        let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == props.userid)].Session.actualScreen)
+        delete actual.props[`pid`]
+        this.SetPath(props.userid,actual.path,actual.props)
+        }
+        
         await build(props)
         if(this.Builds[this.Builds.findIndex(e => e.id == props.userid)]){
             return {
