@@ -513,7 +513,7 @@ ${text}`
                     })
                 }
 
-                if(config.actual_page){
+                if(config.actual_page && !config.template_config){
                     page = config.actual_page
                     objreturn.actual_page = page
                     if(this.userStorage[id]){
@@ -665,6 +665,7 @@ ${text}`
                 buttons_array.forEach(b => {
                     this.Button(id,b.text,b.path,b.props)
                 })
+                
                 this.Buttons(id,sides)
             
         
