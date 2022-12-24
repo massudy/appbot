@@ -4,6 +4,7 @@ import Session from "../Config/Session.js"
 import Spacing from "./Spacing.js"
 import idrule from "../Config/idrule.js"
 import callbackFilter from "../Config/callbackFilter.js"
+import CodeGenerator from "../Config/CodeGenerator.js"
 
 const BuildPagination = (fullarray = [], items_per_page = 5) => {
     let pagination = [{
@@ -114,15 +115,8 @@ constructor(name,linked = [],build = async (props) => {}){
     //array de builds, a cada build é criado um objeto build em branco que é preenchido com a função build() da funcionalidade e depois é removida
     this.Builds = [new userBuild(0)]
 
-    //array de paginations e suas informações de indentificação
-    this.PaginationStorage = [{
-        userid : '',
-        type : '',
-        tag : '',
-        
-
-    }]
-
+    //o famoso user storage
+    this.userStorage = {}
    
 
     //Funções que preenchem texto e botões
@@ -475,8 +469,8 @@ ${text}`
                 },
             template_config : true
         }) => {
+            
             let page = 1
-            if(config.actual_page){page = config.actual_page}
             let objreturn = {
                 actual_page : page,
                 total_pages : 0
@@ -488,13 +482,45 @@ ${text}`
                 let per_page = 5
                 if(config.itens_per_page){if(config.itens_per_page != 5){per_page = config.itens_per_page}}
                 let Pagination = BuildPagination(array,per_page)
-                let keytag = undefined
-
-
-                if(Pagination.length){
-                    if(key){}
+                objreturn.total_pages = Pagination.length
+                
+                // parte que verifica o userstorage 
+                let pagination_id
+                if(this.userStorage[id]){
+                    if(this.userStorage[id][`Paginations`]){
+                       let pagination_storage = this.userStorage[id][`Paginations`].find(p => p.Pagination == JSON.stringify(Pagination))
+                       if(pagination_storage){page = pagination_storage.Page}
+                    } else {
+                        pagination_id = CodeGenerator.AlfaNumeric(3)
+                        this.userStorage[id][`Paginations`] = []
+                        this.userStorage[id][`Paginations`].push({
+                            ID : pagination_id,
+                            Pagination : JSON.stringify(Pagination),
+                            Page : page
+                        }) 
+                    }
+                } else {
+                    pagination_id = CodeGenerator.AlfaNumeric(3)
+                    this.userStorage[id] = {}
+                    this.userStorage[id][`Paginations`] = []
+                    this.userStorage[id][`Paginations`].push({
+                        ID : pagination_id,
+                        Pagination : JSON.stringify(Pagination),
+                        Page : page
+                    })
                 }
 
+                if(config.actual_page){
+                    page = config.actual_page
+                    objreturn.actual_page = page
+                    if(this.userStorage[id]){
+                        if(this.userStorage[id][`Paginations`]){
+                           let pagination_index = this.userStorage[id][`Paginations`].findIndex(p => p.Pagination == JSON.stringify(Pagination))
+                           if(pagination_index != -1){this.userStorage[id][`Paginations`].at(pagination_index).Page = config.actual_page}
+                        }
+                    }
+                }
+        
                 if(page > Pagination.length) {
                     page = Pagination.length
                     objreturn.actual_page = page
@@ -509,52 +535,79 @@ ${text}`
                 buttons_array.splice(0,1)
                 if(config.button && !config.template_config){
                     console.log('Vamos configurar os botões dinamicamente')
+                    let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
 
                     Pagination[Pagination.findIndex(p => p.page == page)].list.forEach(list_instance => {
-                        //buildtext
+                        console.log('fazendo uma instancia')
+                        console.log(buttons_array)
                         let fulltext = ''
-                        config.button.text.forEach(text => {
-                            switch (text.type) {
-                                case 'text':
-                                fulltext = `${fulltext}${text.value}`    
-                                break;
-                                
-                                case 'key':
-                                if(typeof list_instance == 'object'){
-                                    if(list_instance[text.value]){
-                                        fulltext = `${fulltext}${list_instance[text.value]}`
-                                    }
-                                }
-                                break;
-
-                                default:
-                                break;
-                            }
-                        })
-                        
-                        //buildpath
                         let fullpath = ''
-                        switch (config.button.path.type) {
-                            case 'text':
-                                fullpath = config.button.path.value 
-                                break;
+                        let fullprops = {}
                         
-                                case 'key':
+                        
+                        if(typeof list_instance == 'object'){
+                            fulltext = `${Object.keys(list_instance).at(0)} : ${list_instance[Object.keys(list_instance).at(0)]}`
+                            fullpath = actual.path
+                            fullprops = actual.props
+                        } else {
+                            fulltext = list_instance
+                            fullpath = actual.path
+                            fullprops = actual.props
+                        }
+                        
+                        
+                        //buildtext
+                       if(config.button.text){
+                            fulltext = ''
+                            config.button.text.forEach(text => {
+                                switch (text.type) {
+                                    case 'text':
+                                    fulltext = `${fulltext}${text.value}`    
+                                    break;
+                                    
+                                    case 'key':
                                     if(typeof list_instance == 'object'){
-                                        if(list_instance[config.button.path.value]){
-                                           fullpath = list_instance[config.button.path.value]
+                                        if(list_instance[text.value]){
+                                            fulltext = `${fulltext}${list_instance[text.value]}`
                                         }
                                     }
                                     break;
-
-                            default:
-                                break;
+    
+                                    default:
+                                    break;
+                                }
+                            })
                         }
-
+                        
+                        
+                        //buildpath
+                        if(config.button.path){
+                            fullpath = ''
+                            if(config.button.path.type){
+                                switch (config.button.path.type) {
+                                    case 'text':
+                                        fullpath = config.button.path.value 
+                                        break;
+                                
+                                        case 'key':
+                                            if(typeof list_instance == 'object'){
+                                                if(list_instance[config.button.path.value]){
+                                                   fullpath = list_instance[config.button.path.value]
+                                                }
+                                            }
+                                            break;
+        
+                                    default:
+                                        break;
+                                }
+        
+                            }
+                        }
+                        
 
                         //buildprops
-                        let fullprops = {}
                         if(config.button.props){
+                            fullprops = {}
                             config.button.props.forEach(prop => {
                                 switch (prop.value_type) {
                                     case 'text':
@@ -577,7 +630,7 @@ ${text}`
                        
 
                         //pushbutton
-                        buttons_array.push({text : fulltext,path : fullpath, props : fullprops})
+                       console.log(buttons_array.push({text : fulltext,path : fullpath, props : fullprops}))
                     })
 
                 } else {
