@@ -236,7 +236,7 @@ FuncLoaded(info = {
 async LoadScreen(path,session = new Session,alert = null){
 this.Sessions[this.SessionIndex(session.userID)].inAction = true
 let startTime = performance.now()
-let loadinfo = {type : 'loadscreen'}
+let loadinfo = {type : 'loadscreen',userid : session.userID}
 
 this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
 this.Sessions[this.SessionIndex(session.userID)].waitInput = false
@@ -413,7 +413,7 @@ this.FuncLoaded(loadinfo)
 async ReloadScreen(path,session = new Session,alert = null){
     this.Sessions[this.SessionIndex(session.userID)].inAction = true
     let startTime = performance.now()
-    let loadinfo = {type : 'reloadscreen'}
+    let loadinfo = {type : 'reloadscreen',userid : session.userID}
 
     this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
     this.Sessions[this.SessionIndex(session.userID)].admin = this.IsAdmin(session.userID)
