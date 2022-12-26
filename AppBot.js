@@ -9,6 +9,33 @@ import AdjustScreen from "./Func/AdjustScreen.js";
 import idrule from "./Config/idrule.js";
 import AppBot_Emitter from "./Events.js";
 
+const Counter = (text = '',character = '') => {
+    let finalcount = 0
+    let string_array = Array.from(text)
+    string_array.forEach(e => {
+      if(e == character){finalcount += 1}
+    })
+    return finalcount
+  }
+  
+  
+  const Escaper = (text = '') => {
+    let finaltext = text
+    //Essa constante é a array de characteres especiais que devem ser protegidos caso não sejam fechados
+    const markdown_characters = ['*','_','`','~']
+    markdown_characters.forEach(e => {
+      var count = Counter(text,e)
+      if(count > 0 && !(count%2 === 0)){
+        //console.log('Um character especial a mais !!')
+        const index = finaltext.lastIndexOf(e)
+        finaltext = finaltext.slice(0, index) + "\\" + finaltext.slice(index);
+      }
+      //console.log(`Existem ${count} do character ${e}`)
+    })
+   
+  return finaltext
+  }
+
 class AppBot extends TelegramBot {
     constructor(token,mainfunc = TemplateFunc,config = {
         adjustscreen : false,
@@ -316,7 +343,7 @@ if(build_object.ExternalContent.type != null || this.Sessions[this.SessionIndex(
 ${build_object.FinalText}`
             delete options.caption
             this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
-        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        keyboardCreated = await this.sendMessage(session.userID,Escaper(build_object.FinalText),options)
         .then((keyboard) => {
             return keyboard
         }).catch(e => {})
@@ -329,7 +356,7 @@ ${build_object.FinalText}`
 ${build_object.FinalText}`
             delete options.caption
             this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
-        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        keyboardCreated = await this.sendMessage(session.userID,Escaper(build_object.FinalText),options)
         .then((keyboard) => {
             return keyboard
         }).catch(e => {})
@@ -340,7 +367,7 @@ ${build_object.FinalText}`
 
     } else {
         this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
-        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        keyboardCreated = await this.sendMessage(session.userID,Escaper(build_object.FinalText),options)
         .then((keyboard) => {
             return keyboard
         }).catch(e => {})
@@ -360,7 +387,7 @@ ${build_object.FinalText}`
 } else {
     this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
     this.editMessageReplyMarkup(build_object.FinalButtons.reply_markup,config).catch((e) => { })
-    this.editMessageText(build_object.FinalText,config).catch((e) => { })
+    this.editMessageText(Escaper(build_object.FinalText),config).catch((e) => { })
 }
 
 if(build_object.NewRoles){
@@ -480,7 +507,7 @@ ${build_object.FinalText}`
 ${build_object.FinalText}`
             delete options.caption
             this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
-        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        keyboardCreated = await this.sendMessage(session.userID,Escaper(build_object.FinalText),options)
         .then((keyboard) => {
             return keyboard
         }).catch(e => {})
@@ -493,7 +520,7 @@ ${build_object.FinalText}`
 ${build_object.FinalText}`
             delete options.caption
             this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
-        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        keyboardCreated = await this.sendMessage(session.userID,Escaper(build_object.FinalText),options)
         .then((keyboard) => {
             return keyboard
         }).catch(e => {})
@@ -504,7 +531,7 @@ ${build_object.FinalText}`
 
     } else {
         this.Sessions[this.SessionIndex(session.userID)].ExternalContent.type = null
-        keyboardCreated = await this.sendMessage(session.userID,build_object.FinalText,options)
+        keyboardCreated = await this.sendMessage(session.userID,Escaper(build_object.FinalText),options)
         .then((keyboard) => {
             return keyboard
         }).catch(e => {})
