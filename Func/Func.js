@@ -117,6 +117,41 @@ constructor(name,linked = [],build = async (props) => {}){
 
     //o famoso user storage
     this.userStorage = {}
+
+    this.Storages = {
+        Set : (id,type,value) => {
+            if(this.userStorage[id]){
+                if(type){
+                     this.userStorage[id][type] = value
+                }
+            } else {
+                this.userStorage[id] = {}
+                if(type){
+                    this.userStorage[id][type] = value
+                }
+            }
+        },
+        Get : (id,type) => {
+            const objreturn = {
+                success : false,
+                value : undefined
+            }
+            if(this.userStorage[id]){
+                if(type){
+                    if(this.userStorage[id][type] && this.userStorage[id][type] != {}){
+                        objreturn.value = this.userStorage[id][type]
+                        objreturn.success = true
+                    }
+                } else {
+                    objreturn.value = this.userStorage[id]
+                    objreturn.success = true
+                }
+                
+            }
+        
+        return objreturn
+        }
+    }
    
 
     //Funções que preenchem texto e botões
@@ -684,6 +719,31 @@ ${text}`
                 console.error(`Falha ao executar o método Paginaton.Text | ${erro}`)   
             }
         }
+    }
+
+    this.Keyboard = (id) =>{
+        this.Buttons(id,[
+            this.SideButton('1',this.Name,{page : 'num',key : '1'}),
+            this.SideButton('2',this.Name,{page : 'num',key : '2'}),
+            this.SideButton('3',this.Name,{page : 'num',key : '3'})
+        ])
+        this.Buttons(id,[
+            this.SideButton('4',this.Name,{page : 'num',key : '4'}),
+            this.SideButton('5',this.Name,{page : 'num',key : '5'}),
+            this.SideButton('6',this.Name,{page : 'num',key : '6'})
+        ])
+        this.Buttons(id,[
+            this.SideButton('7',this.Name,{page : 'num',key : '7'}),
+            this.SideButton('8',this.Name,{page : 'num',key : '8'}),
+            this.SideButton('9',this.Name,{page : 'num',key : '9'})
+        ])
+    
+        this.Buttons(id,[
+            this.SideButton('Apagar',this.Name,{page : 'num',key : 'del'}),
+            this.SideButton('0',this.Name,{page : 'num',key : '0'}),
+            this.SideButton('Letras',this.Name)
+            
+        ])
     }
 
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
