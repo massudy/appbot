@@ -748,7 +748,8 @@ ${text}`
 
     this.BuildFilter = (props) => {
         let propsreturn = props
-
+        let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == props.userid)].Session.actualScreen)
+        
         if(propsreturn.pid){
             let addpage = 0
             const type = propsreturn.pid.slice(0,1)
@@ -761,9 +762,10 @@ ${text}`
                 }
             }    
         delete propsreturn[`pid`]
+        delete actual.props[`pid`]
         }
-        let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == props.userid)].Session.actualScreen)
-        this.SetPath(props.userid,actual.path,propsreturn)
+        
+        this.SetPath(props.userid,actual.path,actual.props)
         return propsreturn
     }
 
