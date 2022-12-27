@@ -746,27 +746,32 @@ ${text}`
         ])
     }
 
+    this.BuildFilter = (props) => {
+        let propsreturn = props
+
+        if(propsreturn.pid){
+            let addpage = 0
+            const type = propsreturn.pid.slice(0,1)
+            if(type == 'n'){addpage = 1} else {addpage = -1}
+            const pagination_id = propsreturn.pid.slice(1)  
+            if(this.userStorage[propsreturn.userid]){
+                if(this.userStorage[propsreturn.userid][`Paginations`]){
+                   let pagination_index = this.userStorage[propsreturn.userid][`Paginations`].findIndex(p => p.ID == pagination_id)
+                   if(pagination_index != -1){this.userStorage[propsreturn.userid][`Paginations`].at(pagination_index).Page += addpage}
+                }
+            }    
+        delete propsreturn[`pid`]
+        }
+        let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == props.userid)].Session.actualScreen)
+        this.SetPath(props.userid,actual.path,propsreturn)
+        return propsreturn
+    }
+
     //Função de build principal, executa a função build criada na raiz da funcionalidade e retorna o text e buttons gerados por ela
     this.Build = async (props) => { 
        try {
         this.Builds.push(new userBuild(props.userid,props.session))
-        if(props.pid){
-            let addpage = 0
-            const type = props.pid.slice(0,1)
-            if(type == 'n'){addpage = 1} else {addpage = -1}
-            const pagination_id = props.pid.slice(1)  
-            if(this.userStorage[props.userid]){
-                if(this.userStorage[props.userid][`Paginations`]){
-                   let pagination_index = this.userStorage[props.userid][`Paginations`].findIndex(p => p.ID == pagination_id)
-                   if(pagination_index != -1){this.userStorage[props.userid][`Paginations`].at(pagination_index).Page += addpage}
-                }
-            }    
-        delete props[`pid`]
-        let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == props.userid)].Session.actualScreen)
-        delete actual.props[`pid`]
-        this.SetPath(props.userid,actual.path,actual.props)
-        }
-        
+        props = this.BuildFilter(props)
         await build(props)
         if(this.Builds[this.Builds.findIndex(e => e.id == props.userid)]){
             return {
