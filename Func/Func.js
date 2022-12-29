@@ -737,8 +737,8 @@ ${text}`
         Load : (id,name = '',config = {
             confirmbutton : {
                 props : {},
-                include_typed : false,
-                clear_keyboard : false
+                include_typed : true,
+                clear_keyboard : true
             },
             maxlength : 30,
             template_config : true
@@ -759,14 +759,12 @@ ${text}`
                     objreturn.keyboard_name = name
                     
                     if(this.Storages.Get(id,name).success){
-                        console.log('Storage deste keyboard encontrada, pegando o typed...')
                         let storage_data = this.Storages.Get(id,name).value
                         objreturn.typed = storage_data.typed
                         storage_data.max = config.maxlength
                         storage_data.confirmbutton = config.confirmbutton
                         this.Storages.Set(id,name,storage_data)
                     } else {
-                        console.log('Storage do keyboard inexistente, criando uma storage base')
                         //modelo base do storage do keyboard
                         this.Storages.Set(id,name,{
                             typed : '',
@@ -776,6 +774,8 @@ ${text}`
                     }               
     
                     let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
+                    delete actual.props['kt']
+                    delete actual.props['kn']
                     class LoadButton {
                         constructor(texto,addprops = {}){
                             this.Texto = texto
@@ -875,15 +875,24 @@ ${text}`
                         }
                     }
                 }
+                delete propsreturn[`kt`]
+                delete actual.props[`kt`]
             } else {
                 let keyboard_object = this.Storages.Get(propsreturn.userid,propsreturn.kn)
                 if(keyboard_object.success){
-                    
+                    if(keyboard_object.value.confirmbutton.include_typed){
+                        propsreturn.typed = keyboard_object.value.typed
+                    }
+                    if(keyboard_object.value.confirmbutton.clear_keyboard){
+                        this.Keyboard.Clear(propsreturn.userid,propsreturn.kn)
+                    }
                 }
             }
+        
+            delete propsreturn[`kn`]
+            delete actual.props[`kn`]
         }
 
-        
         this.SetPath(props.userid,actual.path,actual.props)
         return propsreturn
     }
