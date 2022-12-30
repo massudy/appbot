@@ -5,6 +5,7 @@ import Spacing from "./Spacing.js"
 import idrule from "../Config/idrule.js"
 import callbackFilter from "../Config/callbackFilter.js"
 import CodeGenerator from "../Config/CodeGenerator.js"
+import VanillaDate from "../Config/VanillaDate.js"
 
 const BuildPagination = (fullarray = [], items_per_page = 5) => {
     let pagination = [{
@@ -754,6 +755,12 @@ ${text}`
     
                 if(!config.maxlength){config.maxlength = 30}
 
+                if(!config.confirmbutton){config.confirmbutton = {
+                    props : {},
+                    include_typed : true,
+                    clear_keyboard : true
+                } }
+
     
                 if(name && name != ''){
                     objreturn.keyboard_name = name
@@ -839,6 +846,71 @@ ${text}`
     }
     }
 
+    this.Calendar = (id,name ='',config = {
+        default_year : '',
+        template_config : true
+    }) => {
+        objreturn = {
+            date : '',
+            hour : ''
+        }
+        
+        let erro
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+
+            if(name && name != ''){
+
+                if(this.Storages.Get(id,name).success){
+                    let storage_data = this.Storages.Get(id,name).value
+                    
+                    this.Storages.Set(id,name,storage_data)
+                } else {
+                    //modelo base do storage do calendar
+                    this.Storages.Set(id,name,{
+                        date : '',
+                        hour : ''
+                    })
+                }   
+
+                /*
+                const days = VanillaDate.DaysOnMonth(2023,2)
+
+
+          
+          let sides = []
+          for(let i = 1; i <= days; i++){
+            if(sides.length < 7 && i < days){
+              sides.push(this.SideButton(i,this.Name))
+            } else {
+              sides.push(this.SideButton(i,this.Name))
+              this.Buttons(id,sides)
+              sides = []
+            }
+          }
+                */
+                //select year
+
+                //select month
+
+                //select day
+
+                //select hour
+
+            } else {
+                erro = 'É necessario inserir o parametro `name`, para identificar o calendar'
+                console.error(`Falha ao executar o método this.Calendar | ${erro}`)
+            }
+
+        } else {
+        if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+        console.error(`Falha ao executar o método Paginaton.Text | ${erro}`)   
+        }
+
+
+
+        return objreturn
+    }
+
 
     this.BuildFilter = (props) => {
         let propsreturn = props
@@ -869,7 +941,7 @@ ${text}`
                             this.Storages.Set(propsreturn.userid,propsreturn.kn,keyboard_object.value)
                         }
                     } else {
-                        if(keyboard_object.value.typed.length <= keyboard_object.value.max){
+                        if(keyboard_object.value.typed.length < keyboard_object.value.max){
                             keyboard_object.value.typed = `${keyboard_object.value.typed}${propsreturn.kt}`
                             this.Storages.Set(propsreturn.userid,propsreturn.kn,keyboard_object.value)
                         }
