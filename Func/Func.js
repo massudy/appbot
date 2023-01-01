@@ -846,11 +846,118 @@ ${text}`
     }
     }
 
+    this.TimePicker = (id,name = '') => {
+        let objreturn = {
+            time : '',
+            hr : '',
+            pr : ''
+        }
+
+        let erro
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+
+            if(name && name != ''){
+            //storage manage
+            if(this.Storages.Get(id,name).success){
+                let storage_data = this.Storages.Get(id,name).value
+                objreturn = storage_data
+                this.Storages.Set(id,name,storage_data)
+            } else {
+                //modelo base do storage do determinado método
+                this.Storages.Set(id,name,{
+                    time : '',
+                    hr : '',
+                    pr : ''
+                })
+            }    
+
+            let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
+            
+            if(objreturn.pr == ''){
+                this.Button(id,'☀️ Manhã',this.Name,{...actual.props,tm_pick : name,pr : 'manha'})
+                this.Button(id,'🌇 Tarde',this.Name,{...actual.props,tm_pick : name,pr : 'tarde'})
+                this.Button(id,'🌙 Noite',this.Name,{...actual.props,tm_pick : name,pr : 'noite'})
+            } else if (objreturn.hr == ''){
+
+                switch (objreturn.pr) {
+                    case 'manha':
+                      for(let i = 5;i <= 12;i++){
+                        let formated
+                        if(i < 10){formated = `0${i}:00`} else {formated = `${i}:00`}
+                        this.Button(id,`🕑 ${formated} hrs`,this.Name,{...actual.props,tm_pick : name,hr : i.toString()})
+                      }
+                      break;
+        
+                      case 'tarde':
+                      for(let i = 13;i <= 19;i++){
+                        let formated
+                        if(i < 10){formated = `0${i}:00`} else {formated = `${i}:00`}
+                        this.Button(id,`🕑 ${formated} hrs`,this.Name,{...actual.props,tm_pick : name,hr : i.toString()})
+                      }
+                      break;
+        
+                      case 'noite':
+                      for(let i = 20;i <= 28;i++){
+                        let formated
+                        let intern = i
+                        if(intern > 23){intern = intern-24}
+        
+                        if(intern < 10){formated = `0${intern}:00`} else {formated = `${intern}:00`}
+                        this.Button(id,`🕑 ${formated} hrs`,this.Name,{...actual.props,tm_pick : name,hr : intern.toString()})
+                      }
+                      break;
+                  
+                    default:
+                      break;
+                  }
+                    
+            this.Button(id,'🔄 Alterar Periodo',this.Name,{...actual.props,tm_pick : name,pr : ''})
+
+            } else {
+                
+            let hrview = objreturn.hr
+            if(objreturn.hr < 10){hrview = `0${objreturn.hr}`}
+
+            for(let i = 0 ; i <= 5;i++){
+            const fulltime = `${hrview}:${i}0`
+            if(objreturn.time == fulltime){
+                this.Button(id,`👉 ${fulltime}`,this.Name,{...actual.props,tm_pick : name,time : fulltime})
+            } else {
+                this.Button(id,`${fulltime}`,this.Name,{...actual.props,tm_pick : name,time : fulltime})
+            }   
+              
+            }
+
+            this.Button(id,'🔄 Alterar Hora',this.Name,{...actual.props,tm_pick : name,hr : '',time : ''})
+
+            }
+
+            //load period picker
+
+            //load hour picker
+
+            //load exactly picker
+
+        } else {
+            erro = 'É necessario inserir o parametro `name`, para identificar o keyboard'
+            console.error(`Falha ao executar o método this.Keyboard | ${erro}`)
+        } 
+
+        }  else {
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao executar o método this.TimePicker | ${erro}`)   
+        }
+
+
+
+        return objreturn
+    }
+
     this.Calendar = (id,name ='',config = {
         default_year : '',
         template_config : true
     }) => {
-        objreturn = {
+       const objreturn = {
             date : '',
             hour : ''
         }
@@ -963,6 +1070,31 @@ ${text}`
         
             delete propsreturn[`kn`]
             delete actual.props[`kn`]
+        }
+
+        if(propsreturn.tm_pick){
+
+            let timepicker_data = this.Storages.Get(propsreturn.userid,propsreturn.tm_pick)
+
+            if(propsreturn.pr != undefined){
+               timepicker_data.value.pr = propsreturn.pr
+                delete propsreturn[`pr`]
+                delete actual.props[`pr`]
+            }
+            if(propsreturn.hr != undefined){
+                timepicker_data.value.hr = propsreturn.hr
+                 delete propsreturn[`hr`]
+                 delete actual.props[`hr`]
+             }
+             if(propsreturn.time != undefined){
+                timepicker_data.value.time = propsreturn.time
+                 delete propsreturn[`time`]
+                 delete actual.props[`time`]
+             }
+
+            this.Storages.Set(propsreturn.userid,propsreturn.tm_pick,timepicker_data.value)
+            delete propsreturn[`tm_pick`]
+            delete actual.props[`tm_pick`]
         }
 
         this.SetPath(props.userid,actual.path,actual.props)
