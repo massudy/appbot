@@ -957,6 +957,96 @@ ${text}`
         return objreturn
     }
 
+    this.DatePicker = (id,name = '') => {
+        let objreturn = {
+            date : '',
+            dp_m : '',
+            dp_y : ''
+        }
+
+        let erro
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+
+            if(name && name != ''){
+            //storage manage
+            if(this.Storages.Get(id,name).success){
+                let storage_data = this.Storages.Get(id,name).value
+                objreturn = storage_data
+                this.Storages.Set(id,name,storage_data)
+            } else {
+                //modelo base do storage do determinado método
+                this.Storages.Set(id,name,{
+                    date : '',
+                    dp_m : VanillaDate.ActualMonth().toString(),
+                    dp_y : VanillaDate.GetYear().toString()
+                })
+                objreturn = {
+                    date : '',
+                    dp_m : VanillaDate.ActualMonth().toString(),
+                    dp_y : VanillaDate.GetYear().toString()
+                    }
+            }    
+
+            if(objreturn.dp_m == ''){
+                let maxsides = 2
+                let sides = []
+                VanillaDate.AllMonths().forEach((m,i) => {
+                    if(sides.length == maxsides){
+                        sides.push(this.SideButton(m,this.Name,{dt_pick : name,dp_m : `${i}`}))
+                        this.Buttons(id,sides)
+                        sides = []
+                    } else {
+                        sides.push(this.SideButton(m,this.Name,{dt_pick : name,dp_m : `${i}`}))
+                    }
+                })
+
+            } else if (objreturn.dp_y == ''){
+                let actualyear = VanillaDate.GetYear()
+                for(let year = actualyear;year <= (actualyear+3);year++){
+                 this.Button(id,year,this.Name,{dt_pick : name,dp_y : `${year}`})
+                }
+            } else {
+
+                const days = VanillaDate.DaysOnMonth(objreturn.dp_y,Number(objreturn.dp_m)+1)
+
+
+                this.Buttons(id,[
+                  this.SideButton(VanillaDate.MonthName(objreturn.dp_m),this.Name,{dt_pick : name,dp_m : ''}),
+                  this.SideButton(objreturn.dp_y,this.Name,{dt_pick : name,dp_y : ''})
+                ])
+                
+                let sides = []
+                for(let i = 1; i <= days; i++){
+                  if(sides.length < 7 && i < days){
+                    sides.push(this.SideButton(i,this.Name,{dt_pick : name,dp_d : `${i}`}))
+                  } else {
+                    sides.push(this.SideButton(i,this.Name,{dt_pick : name,dp_d : `${i}`}))
+                    this.Buttons(id,sides)
+                    sides = []
+                  }
+                }
+
+            }
+            
+            
+            
+            
+
+        } else {
+            erro = 'É necessario inserir o parametro `name`, para identificar o keyboard'
+            console.error(`Falha ao executar o método this.Keyboard | ${erro}`)
+        } 
+
+        }  else {
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao executar o método this.TimePicker | ${erro}`)   
+        }
+
+
+
+        return objreturn
+    }
+
     this.Calendar = (id,name ='',config = {
         default_year : '',
         template_config : true
@@ -1099,6 +1189,41 @@ ${text}`
             this.Storages.Set(propsreturn.userid,propsreturn.tm_pick,timepicker_data.value)
             delete propsreturn[`tm_pick`]
             delete actual.props[`tm_pick`]
+        }
+
+        if(propsreturn.dt_pick){
+            let datepicker_data = this.Storages.Get(propsreturn.userid,propsreturn.dt_pick)
+
+            if(propsreturn.dp_m != undefined){
+                datepicker_data.value.dp_m = propsreturn.dp_m
+                datepicker_data.value.date = ''
+                delete propsreturn[`dp_m`]
+                delete actual.props[`dp_m`]
+            }
+
+            if(propsreturn.dp_y != undefined){
+                datepicker_data.value.dp_y = propsreturn.dp_y
+                datepicker_data.value.date = ''
+                delete propsreturn[`dp_y`]
+                delete actual.props[`dp_y`]
+            }
+
+            if(propsreturn.dp_d != undefined){
+                let month = Number(datepicker_data.value.dp_m)+1
+                if(month < 10){month = `0${month}`}
+                if(propsreturn.dp_d < 10){propsreturn.dp_d = `0${propsreturn.dp_d}`}
+                datepicker_data.value.date = `${propsreturn.dp_d}/${month}/${datepicker_data.value.dp_y}`
+                delete propsreturn[`dp_d`]
+                delete actual.props[`dp_d`]
+            }
+
+
+            
+
+
+            this.Storages.Set(propsreturn.userid,propsreturn.tm_pick,datepicker_data.value)
+            delete propsreturn[`dt_pick`]
+            delete actual.props[`dt_pick`]
         }
 
         this.SetPath(props.userid,actual.path,actual.props)
