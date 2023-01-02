@@ -7,7 +7,8 @@ class Session {
         this.inputValue = null
         this.inAction = false
         this.lastMsgID = null
-        this.actualScreen = null 
+        this.actualScreen = null
+        this.prevScreen = null  
         this.maxFit = config.maxfit
         this.ExternalContent = {
             type : null

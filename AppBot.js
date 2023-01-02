@@ -265,6 +265,7 @@ this.Sessions[this.SessionIndex(session.userID)].inAction = true
 let startTime = performance.now()
 let loadinfo = {type : 'loadscreen',userid : session.userID}
 
+this.Sessions[this.SessionIndex(session.userID)].prevScreen = this.Sessions[this.SessionIndex(session.userID)].actualScreen
 this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
 this.Sessions[this.SessionIndex(session.userID)].waitInput = false
 this.Sessions[this.SessionIndex(session.userID)].waitVideo = false
@@ -429,6 +430,10 @@ if(build_object.waitVideo){
     this.Sessions[this.SessionIndex(session.userID)].waitVideo = true
     this.Sessions[this.SessionIndex(session.userID)].videoPath = build_object.videoPath
 }
+if(callbackFilter(this.Sessions[this.SessionIndex(session.userID)].actualScreen).path != callbackFilter(this.Sessions[this.SessionIndex(session.userID)].prevScreen).path){
+    const prevfunc = this.Funcs.find(f => f.Name == callbackFilter(this.Sessions[this.SessionIndex(session.userID)].prevScreen).path)
+    if(prevfunc){prevfunc.Storages.Clear(session.userID)}
+}
 this.Sessions[this.SessionIndex(session.userID)].inAction = false
 let endTime = performance.now()
 let totaltime = (endTime-startTime).toFixed(2)
@@ -442,6 +447,7 @@ async ReloadScreen(path,session = new Session,alert = null){
     let startTime = performance.now()
     let loadinfo = {type : 'reloadscreen',userid : session.userID}
 
+    this.Sessions[this.SessionIndex(session.userID)].prevScreen = this.Sessions[this.SessionIndex(session.userID)].actualScreen
     this.Sessions[this.SessionIndex(session.userID)].actualScreen = path
     this.Sessions[this.SessionIndex(session.userID)].admin = this.IsAdmin(session.userID)
     const filteredpath = callbackFilter(path)
@@ -583,6 +589,11 @@ ${build_object.FinalText}`
     if(build_object.waitVideo){
         this.Sessions[this.SessionIndex(session.userID)].waitVideo = true
         this.Sessions[this.SessionIndex(session.userID)].videoPath = build_object.videoPath
+    }
+  
+    if(callbackFilter(this.Sessions[this.SessionIndex(session.userID)].actualScreen).path != callbackFilter(this.Sessions[this.SessionIndex(session.userID)].prevScreen).path){
+        const prevfunc = this.Funcs.find(f => f.Name == callbackFilter(this.Sessions[this.SessionIndex(session.userID)].prevScreen).path)
+        if(prevfunc){prevfunc.Storages.Clear(session.userID)}
     }
     this.Sessions[this.SessionIndex(session.userID)].inAction = false
     let endTime = performance.now()
