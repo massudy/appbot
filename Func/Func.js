@@ -734,116 +734,107 @@ ${text}`
         }
     }
     
-    this.Keyboard = {
-        Load : (id,name = '',config = {
-            confirmbutton : {
+    this.Keyboard = (id,name = '',config = {
+        confirmbutton : {
+            props : {},
+            include_typed : true,
+            clear_keyboard : true
+        },
+        maxlength : 30,
+        template_config : true
+    }) =>{
+        
+        let objreturn = {
+            keyboard_name : '',
+            typed : ''
+        }
+
+        let erro
+        if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
+
+            if(!config.maxlength){config.maxlength = 30}
+
+            if(!config.confirmbutton){config.confirmbutton = {
                 props : {},
                 include_typed : true,
                 clear_keyboard : true
-            },
-            maxlength : 30,
-            template_config : true
-        }) =>{
-            
-            let objreturn = {
-                keyboard_name : '',
-                typed : ''
-            }
-    
-            let erro
-            if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
-    
-                if(!config.maxlength){config.maxlength = 30}
+            } }
 
-                if(!config.confirmbutton){config.confirmbutton = {
-                    props : {},
-                    include_typed : true,
-                    clear_keyboard : true
-                } }
 
-    
-                if(name && name != ''){
-                    objreturn.keyboard_name = name
-                    
-                    if(this.Storages.Get(id,name).success){
-                        let storage_data = this.Storages.Get(id,name).value
-                        objreturn.typed = storage_data.typed
-                        storage_data.max = config.maxlength
-                        storage_data.confirmbutton = config.confirmbutton
-                        this.Storages.Set(id,name,storage_data)
-                    } else {
-                        //modelo base do storage do keyboard
-                        this.Storages.Set(id,name,{
-                            typed : '',
-                            max : config.maxlength,
-                            confirmbutton : config.confirmbutton
-                        })
-                    }               
-    
-                    let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
-                    delete actual.props['kt']
-                    delete actual.props['kn']
-                    class LoadButton {
-                        constructor(texto,addprops = {}){
-                            this.Texto = texto
-                            this.AddProps = addprops
-                        }
-                    }
-    
-                    const loadbuttons = [
-                        [
-                            new LoadButton('1',{kt : '1',kn : name}),
-                            new LoadButton('2',{kt : '2',kn : name}),
-                            new LoadButton('3',{kt : '3',kn : name})
-                        ],
-                        [
-                            new LoadButton('4',{kt : '4',kn : name}),
-                            new LoadButton('5',{kt : '5',kn : name}),
-                            new LoadButton('6',{kt : '6',kn : name})
-                        ],
-                        [
-                            new LoadButton('7',{kt : '7',kn : name}),
-                            new LoadButton('8',{kt : '8',kn : name}),
-                            new LoadButton('9',{kt : '9',kn : name})
-                        ],
-                        [
-                            new LoadButton('Apagar',{kt : 'del',kn : name}),
-                            new LoadButton('0',{kt : '0',kn : name}),
-                            new LoadButton('Confirmar',{...config.confirmbutton.props,kn : name})
-                        ]
-                    ]
-            
-                    loadbuttons.forEach(sides_list => {
-                        let sides = []
-                        sides_list.forEach(side => {
-                            const fullprops = {...actual.props,...side.AddProps}
-                            sides.push(this.SideButton(side.Texto,this.Name,fullprops))
-                        })
-                    this.Buttons(id,sides)
-                    })
-    
-                   
-                } else {
-                erro = 'É necessario inserir o parametro `name`, para identificar o keyboard'
-                console.error(`Falha ao executar o método this.Keyboard | ${erro}`)
-                } 
-    
+            if(name && name != ''){
+                objreturn.keyboard_name = name
                 
-    
+                if(this.Storages.Get(id,name).success){
+                    let storage_data = this.Storages.Get(id,name).value
+                    objreturn.typed = storage_data.typed
+                    storage_data.max = config.maxlength
+                    storage_data.confirmbutton = config.confirmbutton
+                    this.Storages.Set(id,name,storage_data)
+                } else {
+                    //modelo base do storage do keyboard
+                    this.Storages.Set(id,name,{
+                        typed : '',
+                        max : config.maxlength,
+                        confirmbutton : config.confirmbutton
+                    })
+                }               
+
+                let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
+                delete actual.props['kt']
+                delete actual.props['kn']
+                class LoadButton {
+                    constructor(texto,addprops = {}){
+                        this.Texto = texto
+                        this.AddProps = addprops
+                    }
+                }
+
+                const loadbuttons = [
+                    [
+                        new LoadButton('1',{kt : '1',kn : name}),
+                        new LoadButton('2',{kt : '2',kn : name}),
+                        new LoadButton('3',{kt : '3',kn : name})
+                    ],
+                    [
+                        new LoadButton('4',{kt : '4',kn : name}),
+                        new LoadButton('5',{kt : '5',kn : name}),
+                        new LoadButton('6',{kt : '6',kn : name})
+                    ],
+                    [
+                        new LoadButton('7',{kt : '7',kn : name}),
+                        new LoadButton('8',{kt : '8',kn : name}),
+                        new LoadButton('9',{kt : '9',kn : name})
+                    ],
+                    [
+                        new LoadButton('Apagar',{kt : 'del',kn : name}),
+                        new LoadButton('0',{kt : '0',kn : name}),
+                        new LoadButton('Confirmar',{...config.confirmbutton.props,kn : name})
+                    ]
+                ]
+        
+                loadbuttons.forEach(sides_list => {
+                    let sides = []
+                    sides_list.forEach(side => {
+                        const fullprops = {...actual.props,...side.AddProps}
+                        sides.push(this.SideButton(side.Texto,this.Name,fullprops))
+                    })
+                this.Buttons(id,sides)
+                })
+
+               
             } else {
-                if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
-                console.error(`Falha ao executar o método this.Keyboard | ${erro}`)   
-            }
-    
-          return objreturn
-        },
-    Info : (id,keyboard_name) => {
-        const storageinfo = this.Storages.Get(id,keyboard_name)
-        return storageinfo.value
-    },
-    Clear : (id,keyboard_name) => {
-        this.Storages.Clear(id,keyboard_name)
-    }
+            erro = 'É necessario inserir o parametro `name`, para identificar o keyboard'
+            console.error(`Falha ao executar o método this.Keyboard | ${erro}`)
+            } 
+
+            
+
+        } else {
+            if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
+            console.error(`Falha ao executar o método this.Keyboard | ${erro}`)   
+        }
+
+      return objreturn
     }
 
     this.TimePicker = (id,name = '') => {
@@ -1063,7 +1054,7 @@ ${text}`
                         propsreturn.typed = keyboard_object.value.typed
                     }
                     if(keyboard_object.value.confirmbutton.clear_keyboard){
-                        this.Keyboard.Clear(propsreturn.userid,propsreturn.kn)
+                        this.Storages.Clear(propsreturn.userid,propsreturn.kn)
                     }
                 }
             }
