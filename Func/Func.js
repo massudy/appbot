@@ -513,7 +513,7 @@ ${text}`
             button : {
                 text : [{type : 'text',value : 'text1'},{type : 'key',value : 'ID'}],
                 path : {type : 'text',value : 'path1'},
-                props : [{props_key : 'id',value_type : 'text', value : 'ID'}]
+                props : [{props_key : 'id',type : 'text', value : 'ID'}]
                 },
             template_config : true
         }) => {
@@ -525,7 +525,8 @@ ${text}`
             let erro
             if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
                 let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
-                
+                let remote_actualprops = actual.props
+                let semprops = true
                 //buildpagination
                let per_page = 5
                 if(config.itens_per_page){if(config.itens_per_page != 5){per_page = config.itens_per_page}}
@@ -657,7 +658,8 @@ ${text}`
                         if(config.button.props){
                             fullprops = {}
                             config.button.props.forEach(prop => {
-                                switch (prop.value_type) {
+                                semprops = false
+                                switch (prop.type) {
                                     case 'text':
                                     fullprops[prop.props_key] = prop.value
                                     break;
@@ -684,6 +686,7 @@ ${text}`
                 } else {
                     
                 if(Pagination.length){
+                   
                         objreturn.total_pages = Pagination.length
                         Pagination[Pagination.findIndex(p => p.page == page)].list.forEach(list_instance => {
                             if(typeof list_instance == 'object'){
@@ -693,8 +696,9 @@ ${text}`
                             }
                         })
                     }
+                    
                 }
-
+                
                 //sidebuttons para passar página
                objreturn.actual_page = page
                 if(objreturn.actual_page > 1){
@@ -706,10 +710,19 @@ ${text}`
                     let next_props = actual.props
                     next_props.pid = `n${pagination_id}`
                     sides.push(this.SideButton(`Página ${objreturn.actual_page+1} ⇨`,actual.path,next_props))
+                    
                 }
 
 
                 //load buttons
+                
+                if(semprops){
+                    buttons_array.forEach((e,i) => {
+                        buttons_array[i].props = {}
+                    })
+                }
+              
+
                 buttons_array.forEach(b => {
                     this.Button(id,b.text,b.path,b.props)
                 })
