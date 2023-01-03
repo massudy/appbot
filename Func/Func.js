@@ -959,11 +959,12 @@ ${text}`
 
     this.DatePicker = (id,name = '') => {
         let objreturn = {
-            date : '',
+            date : '',  
             dp_m : '',
             dp_y : ''
         }
 
+        let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
         let erro
         if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
 
@@ -992,18 +993,18 @@ ${text}`
                 let sides = []
                 VanillaDate.AllMonths().forEach((m,i) => {
                     if(sides.length == maxsides){
-                        sides.push(this.SideButton(m,this.Name,{dt_pick : name,dp_m : `${i}`}))
+                        sides.push(this.SideButton(m,this.Name,{...actual.props,dt_pick : name,dp_m : `${i}`}))
                         this.Buttons(id,sides)
                         sides = []
                     } else {
-                        sides.push(this.SideButton(m,this.Name,{dt_pick : name,dp_m : `${i}`}))
+                        sides.push(this.SideButton(m,this.Name,{...actual.props,dt_pick : name,dp_m : `${i}`}))
                     }
                 })
 
             } else if (objreturn.dp_y == ''){
                 let actualyear = VanillaDate.GetYear()
                 for(let year = actualyear;year <= (actualyear+3);year++){
-                 this.Button(id,year,this.Name,{dt_pick : name,dp_y : `${year}`})
+                 this.Button(id,year,this.Name,{...actual.props,dt_pick : name,dp_y : `${year}`})
                 }
             } else {
 
@@ -1011,16 +1012,16 @@ ${text}`
 
 
                 this.Buttons(id,[
-                  this.SideButton(VanillaDate.MonthName(objreturn.dp_m),this.Name,{dt_pick : name,dp_m : ''}),
-                  this.SideButton(objreturn.dp_y,this.Name,{dt_pick : name,dp_y : ''})
+                  this.SideButton(VanillaDate.MonthName(objreturn.dp_m),this.Name,{...actual.props,dt_pick : name,dp_m : ''}),
+                  this.SideButton(objreturn.dp_y,this.Name,{...actual.props,dt_pick : name,dp_y : ''})
                 ])
                 
                 let sides = []
                 for(let i = 1; i <= days; i++){
                   if(sides.length < 7 && i < days){
-                    sides.push(this.SideButton(i,this.Name,{dt_pick : name,dp_d : `${i}`}))
+                    sides.push(this.SideButton(i,this.Name,{...actual.props,dt_pick : name,dp_d : `${i}`}))
                   } else {
-                    sides.push(this.SideButton(i,this.Name,{dt_pick : name,dp_d : `${i}`}))
+                    sides.push(this.SideButton(i,this.Name,{...actual.props,dt_pick : name,dp_d : `${i}`}))
                     this.Buttons(id,sides)
                     sides = []
                   }
