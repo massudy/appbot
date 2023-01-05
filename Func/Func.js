@@ -776,6 +776,8 @@ ${text}`
 
             if(name && name != ''){
                 objreturn.keyboard_name = name
+
+                if(config.confirmbutton.clear_keyboard == undefined){config.confirmbutton.clear_keyboard = true}
                 
                 if(this.Storages.Get(id,name).success){
                     let storage_data = this.Storages.Get(id,name).value
