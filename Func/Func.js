@@ -507,7 +507,7 @@ ${text}`
     }
 
     this.Pagination = {
-        Button : (id,array = [],config = {
+        Button : (id,name = '',array = [],config = {
             actual_page : 1,
             itens_per_page : 5,
             button : {
@@ -525,7 +525,6 @@ ${text}`
             let erro
             if(this.Builds[this.Builds.findIndex(e => e.id == id)]){
                 let actual = callbackFilter(this.Builds[this.Builds.findIndex(e => e.id == id)].Session.actualScreen)
-                let remote_actualprops = actual.props
                 let semprops = true
                 //buildpagination
                let per_page = 5
@@ -533,47 +532,29 @@ ${text}`
                 let Pagination = BuildPagination(array,per_page)
                 objreturn.total_pages = Pagination.length
                 
-                // parte que verifica o userstorage 
-                let pagination_id
-                if(this.userStorage[id]){
-                    if(this.userStorage[id][`Paginations`]){
-                       let pagination_storage = this.userStorage[id][`Paginations`].find(p => p.Pagination == JSON.stringify(Pagination))
-                       if(pagination_storage){
-                        page = pagination_storage.Page
-                        pagination_id = pagination_storage.ID
-                    }
-                    } else {
-                        pagination_id = CodeGenerator.AlfaNumeric(3)
-                        this.userStorage[id][`Paginations`] = []
-                        this.userStorage[id][`Paginations`].push({
-                            ID : pagination_id,
-                            Pagination : JSON.stringify(Pagination),
-                            Page : page
-                        }) 
-                    }
-                } else {
-                    pagination_id = CodeGenerator.AlfaNumeric(3)
-                    this.userStorage[id] = {}
-                    this.userStorage[id][`Paginations`] = []
-                    this.userStorage[id][`Paginations`].push({
-                        ID : pagination_id,
-                        Pagination : JSON.stringify(Pagination),
-                        Page : page
-                    })
-                }
+                if(name && name != ''){
 
+                let pagination_id = name
+
+                    //storage manage
+                if(this.Storages.Get(id,name).success){
+                let storage_data = this.Storages.Get(id,name).value
                 if(config.actual_page && !config.template_config){
                     page = config.actual_page
-                    objreturn.actual_page = page
-                    if(this.userStorage[id]){
-                        if(this.userStorage[id][`Paginations`]){
-                           let pagination_index = this.userStorage[id][`Paginations`].findIndex(p => p.Pagination == JSON.stringify(Pagination))
-                           if(pagination_index != -1){this.userStorage[id][`Paginations`].at(pagination_index).Page = config.actual_page}
-                        }
-                    }
+                    storage_data.page = page
+                } else {
+                    page = storage_data.page
                 }
-        
-                if(page > Pagination.length) {
+                objreturn.actual_page = storage_data.page
+                this.Storages.Set(id,name,storage_data)
+            } else {
+                //modelo base do storage do determinado método
+                this.Storages.Set(id,name,{
+                    page : page
+                })
+            }  
+
+               if(page > Pagination.length) {
                     page = Pagination.length
                     objreturn.actual_page = page
                 } else if (page < 1){
@@ -700,6 +681,7 @@ ${text}`
                 }
                 
                 //sidebuttons para passar página
+                console.log(page)
                objreturn.actual_page = page
                 if(objreturn.actual_page > 1){
                     let prev_props = actual.props
@@ -729,7 +711,11 @@ ${text}`
                 
                 this.Buttons(id,sides)
             
-        
+            } else {
+                erro = 'É necessario inserir o parametro `name`, para identificar o pagination'
+                console.error(`Falha ao executar o método Pagination.Button | ${erro}`)
+                } 
+
         } else {
                 if(!id){erro = 'USERID NÃO INFORMADO - Coloque o props.userid no parametro id'}
                 console.error(`Falha ao executar o método Paginaton.Button | ${erro}`)   
@@ -1125,12 +1111,10 @@ ${text}`
             const type = propsreturn.pid.slice(0,1)
             if(type == 'n'){addpage = 1} else {addpage = -1}
             const pagination_id = propsreturn.pid.slice(1)  
-            if(this.userStorage[propsreturn.userid]){
-                if(this.userStorage[propsreturn.userid][`Paginations`]){
-                   let pagination_index = this.userStorage[propsreturn.userid][`Paginations`].findIndex(p => p.ID == pagination_id)
-                   if(pagination_index != -1){this.userStorage[propsreturn.userid][`Paginations`].at(pagination_index).Page += addpage}
-                }
-            }    
+            const storagedata = this.Storages.Get(propsreturn.userid,pagination_id)
+            if(storagedata.success){
+                this.Storages.Set(propsreturn.userid,pagination_id,{page : storagedata.value.page+addpage})  
+            }
         delete propsreturn[`pid`]
         delete actual.props[`pid`]
         }
