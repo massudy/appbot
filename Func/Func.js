@@ -681,7 +681,6 @@ ${text}`
                 }
                 
                 //sidebuttons para passar página
-                console.log(page)
                objreturn.actual_page = page
                 if(objreturn.actual_page > 1){
                     let prev_props = actual.props
