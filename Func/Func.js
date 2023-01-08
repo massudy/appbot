@@ -699,7 +699,9 @@ ${text}`
                 
                 if(semprops){
                     buttons_array.forEach((e,i) => {
-                        buttons_array[i].props = {}
+                        if(!Object.keys(e.props).length){
+                            buttons_array[i].props = {}
+                            }
                     })
                 }
               
