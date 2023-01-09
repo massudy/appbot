@@ -760,6 +760,10 @@ ${text}`
                 clear_keyboard : true
             } }
 
+            if(config.confirmbutton.include_typed == undefined){config.confirmbutton.include_typed = true}
+            if(config.confirmbutton.props == undefined){config.confirmbutton.props = {}}
+            if(config.confirmbutton.clear_keyboard == undefined){config.confirmbutton.clear_keyboard = true}
+
 
             if(name && name != ''){
                 objreturn.keyboard_name = name
